@@ -1,9 +1,10 @@
 -- ==========================================
 -- SGCM - SETUP COMPLETO PARA SUPABASE
 -- Crea tablas + inserta datos de prueba
+-- Idempotente: se puede ejecutar mil veces
 -- ==========================================
 
--- ========== TABLAS ==========
+-- ========== TABLAS (solo si no existen) ==========
 CREATE TABLE IF NOT EXISTS Rol (
     ID_Rol SERIAL PRIMARY KEY,
     Nombre_Rol VARCHAR(50) NOT NULL UNIQUE
@@ -88,95 +89,79 @@ CREATE TABLE IF NOT EXISTS Pago (
 
 -- ========== DATOS DE PRUEBA ==========
 
--- Limpiar datos existentes (TRUNCATE CASCADE)
-TRUNCATE TABLE Pago, Consulta_Medica, Cita, Horario_Medico,
-             Medico, Paciente, Usuario, Especialidad, Rol CASCADE;
+-- Limpiar datos existentes
+DELETE FROM Pago;
+DELETE FROM Consulta_Medica;
+DELETE FROM Cita;
+DELETE FROM Horario_Medico;
+DELETE FROM Medico;
+DELETE FROM Paciente;
+DELETE FROM Usuario;
+DELETE FROM Especialidad;
+DELETE FROM Rol;
 
 -- Resetear secuencias
-ALTER SEQUENCE rol_id_rol_seq RESTART WITH 1;
-ALTER SEQUENCE especialidad_id_especialidad_seq RESTART WITH 1;
-ALTER SEQUENCE usuario_id_usuario_seq RESTART WITH 1;
-ALTER SEQUENCE medico_id_medico_seq RESTART WITH 1;
-ALTER SEQUENCE paciente_id_paciente_seq RESTART WITH 1;
-ALTER SEQUENCE horario_medico_id_horario_seq RESTART WITH 1;
-ALTER SEQUENCE cita_id_cita_seq RESTART WITH 1;
-ALTER SEQUENCE consulta_medica_id_consulta_seq RESTART WITH 1;
-ALTER SEQUENCE pago_id_pago_seq RESTART WITH 1;
+ALTER SEQUENCE IF EXISTS rol_id_rol_seq RESTART WITH 1;
+ALTER SEQUENCE IF EXISTS especialidad_id_especialidad_seq RESTART WITH 1;
+ALTER SEQUENCE IF EXISTS usuario_id_usuario_seq RESTART WITH 1;
+ALTER SEQUENCE IF EXISTS medico_id_medico_seq RESTART WITH 1;
+ALTER SEQUENCE IF EXISTS paciente_id_paciente_seq RESTART WITH 1;
+ALTER SEQUENCE IF EXISTS horario_medico_id_horario_seq RESTART WITH 1;
+ALTER SEQUENCE IF EXISTS cita_id_cita_seq RESTART WITH 1;
+ALTER SEQUENCE IF EXISTS consulta_medica_id_consulta_seq RESTART WITH 1;
+ALTER SEQUENCE IF EXISTS pago_id_pago_seq RESTART WITH 1;
 
 -- 1. Roles
-INSERT INTO Rol (Nombre_Rol) VALUES ('Administrador');
-INSERT INTO Rol (Nombre_Rol) VALUES ('Recepcionista');
-INSERT INTO Rol (Nombre_Rol) VALUES ('Medico');
-INSERT INTO Rol (Nombre_Rol) VALUES ('Paciente');
+INSERT INTO Rol (Nombre_Rol) VALUES ('Administrador') ON CONFLICT DO NOTHING;
+INSERT INTO Rol (Nombre_Rol) VALUES ('Recepcionista') ON CONFLICT DO NOTHING;
+INSERT INTO Rol (Nombre_Rol) VALUES ('Medico') ON CONFLICT DO NOTHING;
+INSERT INTO Rol (Nombre_Rol) VALUES ('Paciente') ON CONFLICT DO NOTHING;
 
 -- 2. Especialidades
-INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Medicina General');
-INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Cardiología');
-INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Pediatría');
-INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Ginecología');
-INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Dermatología');
-INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Traumatología');
-INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Oftalmología');
-INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Neurología');
+INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Medicina General') ON CONFLICT DO NOTHING;
+INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Cardiología') ON CONFLICT DO NOTHING;
+INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Pediatría') ON CONFLICT DO NOTHING;
+INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Ginecología') ON CONFLICT DO NOTHING;
+INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Dermatología') ON CONFLICT DO NOTHING;
+INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Traumatología') ON CONFLICT DO NOTHING;
+INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Oftalmología') ON CONFLICT DO NOTHING;
+INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Neurología') ON CONFLICT DO NOTHING;
 
 -- 3. Usuarios
-INSERT INTO Usuario (ID_Rol, Username_Correo, Password_Hash, Estado_Activo)
-VALUES (1, 'admin@sgcm.com', '$2b$10$DW25pjba54e6kg/A67yOAu2jJT9t6H04V0vfM4uI21WVZkDiikEwK', true);
-
-INSERT INTO Usuario (ID_Rol, Username_Correo, Password_Hash, Estado_Activo)
-VALUES (2, 'recepcion@sgcm.com', '$2b$10$ShjxAE4rXy42AJvJ.zdd4uMvfzGBAeFOnNNZVjaNu/LF.WkZ2Yjgi', true);
-
-INSERT INTO Usuario (ID_Rol, Username_Correo, Password_Hash, Estado_Activo)
-VALUES (3, 'dr.paredes@sgcm.com', '$2b$10$ZhpJxcUekfpQBbmZmpt3zOwEjOnsngYXWBW9SOw6U8AQh9YOhEO6K', true);
-
-INSERT INTO Usuario (ID_Rol, Username_Correo, Password_Hash, Estado_Activo)
-VALUES (3, 'dra.lopez@sgcm.com', '$2b$10$FG2IBuDZjmOmR2RhweG19O7jO5467piPQur1bbpIlmJr.FOx.0Mze', true);
-
-INSERT INTO Usuario (ID_Rol, Username_Correo, Password_Hash, Estado_Activo)
-VALUES (4, '1100123456', '$2b$10$0YWwk9/MRNJ.D9Gu5Xff1.XMw0l6fsGArLXshgwdzcY9zi7bOtcVS', true);
+INSERT INTO Usuario (ID_Rol, Username_Correo, Password_Hash, Estado_Activo) VALUES
+(1, 'admin@sgcm.com', '$2b$10$DW25pjba54e6kg/A67yOAu2jJT9t6H04V0vfM4uI21WVZkDiikEwK', true),
+(2, 'recepcion@sgcm.com', '$2b$10$ShjxAE4rXy42AJvJ.zdd4uMvfzGBAeFOnNNZVjaNu/LF.WkZ2Yjgi', true),
+(3, 'dr.paredes@sgcm.com', '$2b$10$ZhpJxcUekfpQBbmZmpt3zOwEjOnsngYXWBW9SOw6U8AQh9YOhEO6K', true),
+(3, 'dra.lopez@sgcm.com', '$2b$10$FG2IBuDZjmOmR2RhweG19O7jO5467piPQur1bbpIlmJr.FOx.0Mze', true),
+(4, '1100123456', '$2b$10$0YWwk9/MRNJ.D9Gu5Xff1.XMw0l6fsGArLXshgwdzcY9zi7bOtcVS', true),
+(4, '1100789012', '$2b$10$0YWwk9/MRNJ.D9Gu5Xff1.XMw0l6fsGArLXshgwdzcY9zi7bOtcVS', true)
+ON CONFLICT (username_correo) DO UPDATE SET password_hash = EXCLUDED.password_hash, estado_activo = true;
+-- Los pacientes usan su DNI como username y password "paciente123"
 
 -- 4. Médicos
-INSERT INTO Medico (ID_Usuario, ID_Especialidad, Nombres, Apellidos, Numero_Colegiatura)
-VALUES (3, 1, 'Carlos', 'Paredes Molina', 'COL-12345');
+INSERT INTO Medico (ID_Usuario, ID_Especialidad, Nombres, Apellidos, Numero_Colegiatura) VALUES
+(3, 1, 'Carlos', 'Paredes Molina', 'COL-12345'),
+(4, 2, 'María', 'López García', 'COL-12346')
+ON CONFLICT (id_usuario) DO NOTHING;
 
-INSERT INTO Medico (ID_Usuario, ID_Especialidad, Nombres, Apellidos, Numero_Colegiatura)
-VALUES (4, 2, 'María', 'López García', 'COL-12346');
-
--- 5. Pacientes
-INSERT INTO Paciente (ID_Usuario, DNI, Nombres, Apellidos, Telefono, Fecha_Nacimiento)
-VALUES (5, '1100123456', 'Juan', 'Pérez Ramírez', '0999123456', '1990-05-15');
-
-INSERT INTO Paciente (ID_Usuario, DNI, Nombres, Apellidos, Telefono, Fecha_Nacimiento)
-VALUES (5, '1100789012', 'Ana', 'Jiménez Torres', '0999789012', '1985-08-22');
+-- 5. Pacientes (relación 1 a 1 con Usuario)
+INSERT INTO Paciente (ID_Usuario, DNI, Nombres, Apellidos, Telefono, Fecha_Nacimiento) VALUES
+(5, '1100123456', 'Juan', 'Pérez Ramírez', '0999123456', '1990-05-15'),
+(6, '1100789012', 'Ana', 'Jiménez Torres', '0999789012', '1985-08-22')
+ON CONFLICT (id_usuario) DO NOTHING;
 
 -- 6. Horarios
-INSERT INTO Horario_Medico (ID_Medico, Dia_Semana, Hora_Inicio, Hora_Fin)
-VALUES (1, 'Lunes', '08:00', '12:00');
-
-INSERT INTO Horario_Medico (ID_Medico, Dia_Semana, Hora_Inicio, Hora_Fin)
-VALUES (1, 'Lunes', '14:00', '17:00');
-
-INSERT INTO Horario_Medico (ID_Medico, Dia_Semana, Hora_Inicio, Hora_Fin)
-VALUES (1, 'Miércoles', '08:00', '12:00');
-
-INSERT INTO Horario_Medico (ID_Medico, Dia_Semana, Hora_Inicio, Hora_Fin)
-VALUES (1, 'Viernes', '08:00', '12:00');
-
-INSERT INTO Horario_Medico (ID_Medico, Dia_Semana, Hora_Inicio, Hora_Fin)
-VALUES (2, 'Martes', '08:00', '12:00');
-
-INSERT INTO Horario_Medico (ID_Medico, Dia_Semana, Hora_Inicio, Hora_Fin)
-VALUES (2, 'Jueves', '08:00', '12:00');
-
-INSERT INTO Horario_Medico (ID_Medico, Dia_Semana, Hora_Inicio, Hora_Fin)
-VALUES (2, 'Viernes', '14:00', '18:00');
+INSERT INTO Horario_Medico (ID_Medico, Dia_Semana, Hora_Inicio, Hora_Fin) VALUES
+(1, 'Lunes', '08:00', '12:00'),
+(1, 'Lunes', '14:00', '17:00'),
+(1, 'Miércoles', '08:00', '12:00'),
+(1, 'Viernes', '08:00', '12:00'),
+(2, 'Martes', '08:00', '12:00'),
+(2, 'Jueves', '08:00', '12:00'),
+(2, 'Viernes', '14:00', '18:00');
 
 -- 7. Citas de ejemplo
-INSERT INTO Cita (ID_Paciente, ID_Medico, Fecha_Hora, Estado)
-VALUES (1, 1, NOW() + INTERVAL '1 hour', 'Pendiente');
-
-INSERT INTO Cita (ID_Paciente, ID_Medico, Fecha_Hora, Estado)
-VALUES (2, 2, NOW() + INTERVAL '2 hours', 'Pendiente');
-
-INSERT INTO Cita (ID_Paciente, ID_Medico, Fecha_Hora, Estado)
-VALUES (1, 1, NOW() + INTERVAL '1 day', 'Pendiente');
+INSERT INTO Cita (ID_Paciente, ID_Medico, Fecha_Hora, Estado) VALUES
+(1, 1, NOW() + INTERVAL '1 hour', 'Pendiente'),
+(2, 2, NOW() + INTERVAL '2 hours', 'Pendiente'),
+(1, 1, NOW() + INTERVAL '1 day', 'Pendiente');
