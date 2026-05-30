@@ -1,0 +1,10 @@
+# Vercel ignore
+.git
+.gitignore
+*.md
+.vscode
+.angular
+backend/.env
+README.md
+MIGRACION_SUPABASE.md
+SUPABASE_MIGRATION.sql
