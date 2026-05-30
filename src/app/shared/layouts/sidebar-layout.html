@@ -1,0 +1,52 @@
+<div class="d-flex" style="min-height: 100dvh;">
+  <nav class="d-flex flex-column flex-shrink-0 text-white sidebar-nav" style="width: 260px; background: linear-gradient(180deg, #0c4a6e 0%, #0a3d5c 100%);">
+    <div class="p-4 border-bottom border-white border-opacity-10">
+      <div class="d-flex align-items-center gap-2">
+        <div class="bg-white rounded-2 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0c4a6e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        </div>
+        <div>
+          <h6 class="mb-0 fw-bold" style="font-size: 1rem;">{{ title }}</h6>
+          <small class="opacity-60" style="font-size: 0.7rem;">{{ roleName }}</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex-grow-1 py-3 overflow-auto">
+      @for (item of navItems; track item.route) {
+        <a
+          [routerLink]="item.route"
+          class="d-flex align-items-center gap-3 px-4 py-3 text-white text-decoration-none nav-link-custom"
+          routerLinkActive="active fw-semibold"
+          [routerLinkActiveOptions]="{ exact: true }"
+          style="font-size: 0.875rem; transition: all 0.2s;"
+        >
+          <i [class]="item.icon" style="font-size: 1.1rem; width: 22px;"></i>
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    </div>
+
+    <div class="p-3 border-top border-white border-opacity-10">
+      <div class="d-flex align-items-center gap-3 mb-3 px-1">
+        <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white flex-shrink-0" style="width: 42px; height: 42px; background: linear-gradient(135deg, #38bdf8, #818cf8); font-size: 1rem;">
+          {{ (auth.userNombre() || 'U')[0] }}
+        </div>
+        <div class="small overflow-hidden" style="line-height: 1.3;">
+          <div class="fw-semibold text-truncate" style="font-size: 0.85rem;">{{ auth.userNombre() || 'Usuario' }}</div>
+          <div class="opacity-75 text-truncate" style="font-size: 0.7rem;">{{ auth.userRole() || 'Sin rol' }}</div>
+        </div>
+      </div>
+      <button class="btn btn-outline-light btn-sm w-100 py-2 d-flex align-items-center justify-content-center gap-2" (click)="logout()" style="border-radius: 8px; font-size: 0.8rem; opacity: 0.8;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Cerrar Sesión
+      </button>
+    </div>
+  </nav>
+
+  <main class="flex-grow-1 p-4" style="overflow-y: auto; background: #f0f2f5; min-height: 100dvh;">
+    <router-outlet />
+  </main>
+</div>

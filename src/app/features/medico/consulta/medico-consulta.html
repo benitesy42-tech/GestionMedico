@@ -1,0 +1,36 @@
+<div>
+  @if (cita(); as c) {
+    <div class="mb-4">
+      <h4 class="fw-bold mb-1">Registrar Consulta</h4>
+      <p class="text-muted mb-0">
+        Atendiendo a <strong>{{ c.PacienteNombre }}</strong> - {{ c.Fecha_Hora | date:'dd/MM/yyyy HH:mm' }}
+      </p>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Motivo de Consulta</label>
+          <textarea class="form-control" rows="2" [(ngModel)]="form.Motivo" placeholder="Describa el motivo..."></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Síntomas</label>
+          <textarea class="form-control" rows="3" [(ngModel)]="form.Sintomas" placeholder="Síntomas del paciente..."></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Diagnóstico / Notas</label>
+          <textarea class="form-control" rows="4" [(ngModel)]="form.Diagnostico_Notas" placeholder="Diagnóstico y notas médicas..."></textarea>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-success" (click)="finalizar()" [disabled]="loading() || !form.Motivo || !form.Diagnostico_Notas">
+            @if (loading()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+            Finalizar Consulta
+          </button>
+          <button class="btn btn-secondary" (click)="goBack()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="alert alert-warning">Cita no encontrada</div>
+  }
+</div>

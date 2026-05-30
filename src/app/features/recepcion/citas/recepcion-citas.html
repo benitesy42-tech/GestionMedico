@@ -1,0 +1,121 @@
+<div class="animate-fade-in">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h5 class="fw-bold mb-1" style="color: #0c4a6e;">Agenda de Citas</h5>
+      <p class="text-muted small mb-0">Gestión de citas médicas</p>
+    </div>
+    <button class="btn btn-primary rounded-pill px-4 shadow-sm" (click)="openNew()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nueva Cita
+    </button>
+  </div>
+
+  @if (showForm()) {
+    <div class="card border-0 shadow-sm mb-4 animate-fade-in">
+      <div class="card-header bg-white py-3">
+        <h6 class="fw-bold mb-0" style="color: #0c4a6e;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
+          Nueva Cita
+        </h6>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Buscar Paciente</label>
+            <input class="form-control mb-2" [(ngModel)]="searchPaciente" placeholder="DNI o nombre..." />
+            <div class="border rounded-3 overflow-hidden" style="max-height: 150px; overflow-y: auto;">
+              @for (p of filteredPacientes; track p.ID_Paciente) {
+                <div class="p-2 border-bottom cursor-pointer" [class.bg-primary]="form.ID_Paciente === p.ID_Paciente" [class.text-white]="form.ID_Paciente === p.ID_Paciente" (click)="form.ID_Paciente = p.ID_Paciente" style="cursor: pointer; font-size: 0.85rem;">
+                  {{ p.DNI }} - {{ p.Nombres }} {{ p.Apellidos }}
+                </div>
+              } @empty {
+                <div class="p-2 text-muted small">Sin resultados</div>
+              }
+            </div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Médico</label>
+            <select class="form-select" [(ngModel)]="form.ID_Medico">
+              <option value="0">Seleccione...</option>
+              @for (m of medicos(); track m.ID_Medico) {
+                <option [value]="m.ID_Medico">{{ m.Nombres }} {{ m.Apellidos }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-semibold small">Fecha y Hora</label>
+            <input type="datetime-local" class="form-control" [(ngModel)]="form.Fecha_Hora" />
+          </div>
+        </div>
+        <div class="mt-4 d-flex gap-2">
+          <button class="btn btn-primary rounded-pill px-4" (click)="save()" [disabled]="loading() || !form.ID_Paciente || !form.ID_Medico || !form.Fecha_Hora">
+            @if (loading()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><polyline points="20 6 9 17 4 12"/></svg>
+            Agendar Cita
+          </button>
+          <button class="btn btn-outline-secondary rounded-pill px-4" (click)="cancelForm()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="input-group">
+        <span class="input-group-text bg-white border-end-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6c757d" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
+        </span>
+        <input type="date" class="form-control border-start-0 ps-0" [(ngModel)]="filterDate" placeholder="Filtrar por fecha" />
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Paciente</th>
+            <th>Médico</th>
+            <th>Especialidad</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of filteredCitas; track c.ID_Cita) {
+            <tr class="align-middle">
+              <td><span class="fw-semibold">{{ c.Fecha_Hora | date:'dd/MM/yyyy HH:mm' }}</span></td>
+              <td>{{ c.PacienteNombre }}</td>
+              <td>{{ c.MedicoNombre }}</td>
+              <td>{{ c.Especialidad }}</td>
+              <td>
+                <span class="badge rounded-pill" [class.bg-secondary]="c.Estado === 'Pendiente'" [class.bg-warning]="c.Estado === 'En Espera'" [class.bg-success]="c.Estado === 'Atendida'" [class.bg-danger]="c.Estado === 'Cancelada'">
+                  {{ c.Estado }}
+                </span>
+              </td>
+              <td>
+                <div class="d-flex gap-1">
+                  @if (c.Estado === 'Pendiente') {
+                    <button class="btn btn-sm btn-outline-warning rounded-pill px-3" (click)="updateEstado(c.ID_Cita, 'En Espera')" title="Marcar como llegó">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger rounded-pill" (click)="updateEstado(c.ID_Cita, 'Cancelada')" title="Cancelar cita">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="6" class="text-center py-5 text-muted">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#dee2e6" stroke-width="1.5" class="mb-2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <p class="mb-0">No hay citas registradas</p>
+            </td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

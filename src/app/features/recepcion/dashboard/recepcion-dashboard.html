@@ -1,0 +1,113 @@
+<div class="animate-fade-in">
+  <div class="mb-4">
+    <h4 class="fw-bold mb-1" style="color: #0c4a6e;">Panel de Recepción</h4>
+    <p class="text-muted mb-0">Gestión diaria de citas y pacientes</p>
+  </div>
+
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+      <p class="text-muted mt-2">Cargando citas del día...</p>
+    </div>
+  } @else {
+    <div class="row g-3 mb-4">
+      <div class="col-md-3 col-6">
+        <div class="card border-0 h-100 dashboard-card" style="background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);">
+          <div class="card-body">
+            <p class="text-white text-opacity-75 small mb-1">Citas Hoy</p>
+            <h3 class="fw-bold text-white mb-0 counter">{{ stats().citasHoy }}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="card border-0 h-100 dashboard-card" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);">
+          <div class="card-body">
+            <p class="text-white text-opacity-75 small mb-1">Pendientes</p>
+            <h3 class="fw-bold text-white mb-0 counter">{{ stats().citasPendientes }}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="card border-0 h-100 dashboard-card" style="background: linear-gradient(135deg, #198754 0%, #20c997 100%);">
+          <div class="card-body">
+            <p class="text-white text-opacity-75 small mb-1">Atendidas</p>
+            <h3 class="fw-bold text-white mb-0 counter">{{ stats().citasAtendidas }}</h3>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <div class="card border-0 h-100 dashboard-card" style="background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);">
+          <div class="card-body">
+            <p class="text-white text-opacity-75 small mb-1">Ingresos Hoy</p>
+            <h3 class="fw-bold text-white mb-0 counter">${{ stats().ingresosHoy.toFixed(0) }}</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2 mb-4 flex-wrap">
+      <a routerLink="/recepcion/pacientes" class="btn btn-outline-primary rounded-pill px-4">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Pacientes
+      </a>
+      <a routerLink="/recepcion/citas" class="btn btn-outline-success rounded-pill px-4">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Agendar Citas
+      </a>
+      <a routerLink="/recepcion/pagos" class="btn btn-outline-warning rounded-pill px-4">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Pagos
+      </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h6 class="fw-bold mb-0" style="color: #0c4a6e;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Citas del Día
+        </h6>
+        <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill">{{ citasHoy().length }} citas</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>Hora</th>
+              <th>Paciente</th>
+              <th>Médico</th>
+              <th>Especialidad</th>
+              <th>Estado</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of citasHoy(); track c.ID_Cita) {
+              <tr class="align-middle">
+                <td><span class="fw-semibold">{{ c.Fecha_Hora | date:'HH:mm' }}</span></td>
+                <td>{{ c.PacienteNombre }}</td>
+                <td>{{ c.MedicoNombre }}</td>
+                <td>{{ c.Especialidad }}</td>
+                <td>
+                  <span class="badge {{ getBadgeClass(c.Estado) }} rounded-pill">{{ c.Estado }}</span>
+                </td>
+                <td>
+                  @if (c.Estado === 'Pendiente') {
+                    <button class="btn btn-sm btn-warning rounded-pill px-3" (click)="marcarEnEspera(c.ID_Cita)">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><polyline points="20 6 9 17 4 12"/></svg>
+                      Llegó
+                    </button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="6" class="text-center py-5 text-muted">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#dee2e6" stroke-width="1.5" class="mb-2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <p class="mb-0">No hay citas programadas para hoy</p>
+              </td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>
