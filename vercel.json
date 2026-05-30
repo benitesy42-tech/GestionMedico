@@ -1,9 +1,9 @@
 {
-  "outputDirectory": "dist/ProyectoGestionMedico/browser",
   "buildCommand": "npm run build",
   "installCommand": "npm install",
+  "outputDirectory": "dist/ProyectoGestionMedico/browser",
+  "framework": null,
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/index.js" },
-    { "src": "/(.*)", "methods": ["GET"], "dest": "/index.html" }
+    { "src": "/(.*)", "dest": "/api/index.js" }
   ]
 }

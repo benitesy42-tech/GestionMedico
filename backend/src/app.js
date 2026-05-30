@@ -1,6 +1,8 @@
 const express = require('express');
+const path = require('path');
+const fs = require('fs');
 const cors = require('cors');
-require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 const authRoutes = require('./routes/auth');
 const medicosRoutes = require('./routes/medicos');
@@ -28,6 +30,16 @@ app.use('/api/citas', citasRoutes);
 app.use('/api/consultas', consultasRoutes);
 app.use('/api/pagos', pagosRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+
+// Servir archivos estáticos del frontend (en producción con Vercel)
+const distPath = path.join(__dirname, '..', '..', 'dist', 'ProyectoGestionMedico', 'browser');
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+  // SPA fallback: cualquier ruta que no sea API sirve index.html
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
 
 app.use((err, req, res, next) => {
   console.error('Error no controlado:', err);
