@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiBaseUrl: 'https://gestionmedico-production.up.railway.app/api',
+  apiBaseUrl: 'http://localhost:3000/api',
 };
