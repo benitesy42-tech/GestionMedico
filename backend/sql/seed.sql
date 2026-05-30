@@ -49,6 +49,11 @@ INSERT INTO Usuario (ID_Rol, Username_Correo, Password_Hash, Estado_Activo)
 VALUES (4, '1100123456', '$2b$10$0YWwk9/MRNJ.D9Gu5Xff1.XMw0l6fsGArLXshgwdzcY9zi7bOtcVS', true);
 -- Password: paciente123
 
+-- Usuario Paciente 2
+INSERT INTO Usuario (ID_Rol, Username_Correo, Password_Hash, Estado_Activo)
+VALUES (4, '1100789012', '$2b$10$0YWwk9/MRNJ.D9Gu5Xff1.XMw0l6fsGArLXshgwdzcY9zi7bOtcVS', true);
+-- Password: paciente123
+
 -- 4. Médicos
 INSERT INTO Medico (ID_Usuario, ID_Especialidad, Nombres, Apellidos, Numero_Colegiatura)
 VALUES (3, 1, 'Carlos', 'Paredes Molina', 'COL-12345');
@@ -61,7 +66,7 @@ INSERT INTO Paciente (ID_Usuario, DNI, Nombres, Apellidos, Telefono, Fecha_Nacim
 VALUES (5, '1100123456', 'Juan', 'Pérez Ramírez', '0999123456', '1990-05-15');
 
 INSERT INTO Paciente (ID_Usuario, DNI, Nombres, Apellidos, Telefono, Fecha_Nacimiento)
-VALUES (5, '1100789012', 'Ana', 'Jiménez Torres', '0999789012', '1985-08-22');
+VALUES (6, '1100789012', 'Ana', 'Jiménez Torres', '0999789012', '1985-08-22');
 
 -- 6. Horarios Médicos (disponibilidad de ejemplo)
 INSERT INTO Horario_Medico (ID_Medico, Dia_Semana, Hora_Inicio, Hora_Fin)
