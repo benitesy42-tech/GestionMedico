@@ -3,6 +3,28 @@
 -- Ejecutar en SQL Editor de Supabase
 -- ==========================================
 
+-- Limpiar datos existentes (orden inverso de FK)
+DELETE FROM Pago;
+DELETE FROM Consulta;
+DELETE FROM Cita;
+DELETE FROM Horario_Medico;
+DELETE FROM Medico;
+DELETE FROM Paciente;
+DELETE FROM Usuario;
+DELETE FROM Especialidad;
+DELETE FROM Rol;
+
+-- Resetear secuencias (para que IDs empiecen desde 1)
+ALTER SEQUENCE rol_id_rol_seq RESTART WITH 1;
+ALTER SEQUENCE especialidad_id_especialidad_seq RESTART WITH 1;
+ALTER SEQUENCE usuario_id_usuario_seq RESTART WITH 1;
+ALTER SEQUENCE medico_id_medico_seq RESTART WITH 1;
+ALTER SEQUENCE paciente_id_paciente_seq RESTART WITH 1;
+ALTER SEQUENCE horario_medico_id_horario_seq RESTART WITH 1;
+ALTER SEQUENCE cita_id_cita_seq RESTART WITH 1;
+ALTER SEQUENCE consulta_id_consulta_seq RESTART WITH 1;
+ALTER SEQUENCE pago_id_pago_seq RESTART WITH 1;
+
 -- 1. Roles
 INSERT INTO Rol (Nombre_Rol) VALUES ('Administrador');
 INSERT INTO Rol (Nombre_Rol) VALUES ('Recepcionista');
@@ -19,7 +41,7 @@ INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Traumatología');
 INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Oftalmología');
 INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Neurología');
 
--- 3. Usuarios (cada uno con su propia contraseña)
+-- 3. Usuarios
 INSERT INTO Usuario (ID_Rol, Username_Correo, Password_Hash, Estado_Activo)
 VALUES (1, 'admin@sgcm.com', '$2b$10$DW25pjba54e6kg/A67yOAu2jJT9t6H04V0vfM4uI21WVZkDiikEwK', true);
 -- Password: admin123
@@ -57,23 +79,31 @@ VALUES (5, '1100789012', 'Ana', 'Jiménez Torres', '0999789012', '1985-08-22');
 -- 6. Horarios
 INSERT INTO Horario_Medico (ID_Medico, Dia_Semana, Hora_Inicio, Hora_Fin)
 VALUES (1, 'Lunes', '08:00', '12:00');
+
 INSERT INTO Horario_Medico (ID_Medico, Dia_Semana, Hora_Inicio, Hora_Fin)
 VALUES (1, 'Lunes', '14:00', '17:00');
+
 INSERT INTO Horario_Medico (ID_Medico, Dia_Semana, Hora_Inicio, Hora_Fin)
 VALUES (1, 'Miércoles', '08:00', '12:00');
+
 INSERT INTO Horario_Medico (ID_Medico, Dia_Semana, Hora_Inicio, Hora_Fin)
 VALUES (1, 'Viernes', '08:00', '12:00');
+
 INSERT INTO Horario_Medico (ID_Medico, Dia_Semana, Hora_Inicio, Hora_Fin)
 VALUES (2, 'Martes', '08:00', '12:00');
+
 INSERT INTO Horario_Medico (ID_Medico, Dia_Semana, Hora_Inicio, Hora_Fin)
 VALUES (2, 'Jueves', '08:00', '12:00');
+
 INSERT INTO Horario_Medico (ID_Medico, Dia_Semana, Hora_Inicio, Hora_Fin)
 VALUES (2, 'Viernes', '14:00', '18:00');
 
 -- 7. Citas de ejemplo
 INSERT INTO Cita (ID_Paciente, ID_Medico, Fecha_Hora, Estado)
 VALUES (1, 1, NOW() + INTERVAL '1 hour', 'Pendiente');
+
 INSERT INTO Cita (ID_Paciente, ID_Medico, Fecha_Hora, Estado)
 VALUES (2, 2, NOW() + INTERVAL '2 hours', 'Pendiente');
+
 INSERT INTO Cita (ID_Paciente, ID_Medico, Fecha_Hora, Estado)
 VALUES (1, 1, NOW() + INTERVAL '1 day', 'Pendiente');
