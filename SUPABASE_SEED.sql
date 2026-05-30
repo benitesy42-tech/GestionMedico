@@ -3,16 +3,11 @@
 -- Ejecutar en SQL Editor de Supabase
 -- ==========================================
 
--- Limpiar datos existentes (orden inverso de FK)
-DELETE FROM Cita;
-DELETE FROM Horario_Medico;
-DELETE FROM Medico;
-DELETE FROM Paciente;
-DELETE FROM Usuario;
-DELETE FROM Especialidad;
-DELETE FROM Rol;
+-- Limpiar todo con TRUNCATE CASCADE (maneja FKs automáticamente)
+TRUNCATE TABLE Cita, Horario_Medico, Medico, Paciente, Usuario,
+             Especialidad, Rol CASCADE;
 
--- Resetear secuencias (para que IDs empiecen desde 1)
+-- Resetear secuencias
 ALTER SEQUENCE rol_id_rol_seq RESTART WITH 1;
 ALTER SEQUENCE especialidad_id_especialidad_seq RESTART WITH 1;
 ALTER SEQUENCE usuario_id_usuario_seq RESTART WITH 1;
@@ -37,7 +32,7 @@ INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Traumatología');
 INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Oftalmología');
 INSERT INTO Especialidad (Nombre_Especialidad) VALUES ('Neurología');
 
--- 3. Usuarios
+-- 3. Usuarios (cada uno con hash bcrypt único)
 INSERT INTO Usuario (ID_Rol, Username_Correo, Password_Hash, Estado_Activo)
 VALUES (1, 'admin@sgcm.com', '$2b$10$DW25pjba54e6kg/A67yOAu2jJT9t6H04V0vfM4uI21WVZkDiikEwK', true);
 -- Password: admin123
