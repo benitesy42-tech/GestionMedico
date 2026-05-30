@@ -4,8 +4,6 @@
 -- ==========================================
 
 -- Limpiar datos existentes (orden inverso de FK)
-DELETE FROM Pago;
-DELETE FROM Consulta;
 DELETE FROM Cita;
 DELETE FROM Horario_Medico;
 DELETE FROM Medico;
@@ -22,8 +20,6 @@ ALTER SEQUENCE medico_id_medico_seq RESTART WITH 1;
 ALTER SEQUENCE paciente_id_paciente_seq RESTART WITH 1;
 ALTER SEQUENCE horario_medico_id_horario_seq RESTART WITH 1;
 ALTER SEQUENCE cita_id_cita_seq RESTART WITH 1;
-ALTER SEQUENCE consulta_id_consulta_seq RESTART WITH 1;
-ALTER SEQUENCE pago_id_pago_seq RESTART WITH 1;
 
 -- 1. Roles
 INSERT INTO Rol (Nombre_Rol) VALUES ('Administrador');
