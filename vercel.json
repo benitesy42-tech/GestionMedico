@@ -2,7 +2,8 @@
   "outputDirectory": "dist/ProyectoGestionMedico/browser",
   "buildCommand": "npm run build",
   "installCommand": "npm install",
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/index.js" },
+    { "src": "/(.*)", "methods": ["GET"], "dest": "/index.html" }
   ]
 }
