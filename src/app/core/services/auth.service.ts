@@ -61,7 +61,8 @@ export class AuthService {
   }
 
   private redirectByRole(rol: string): void {
-    switch (rol.toLowerCase()) {
+    const r = rol.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    switch (r) {
       case 'administrador':
         this.router.navigate(['/admin']);
         break;
@@ -70,6 +71,9 @@ export class AuthService {
         break;
       case 'medico':
         this.router.navigate(['/medico']);
+        break;
+      case 'paciente':
+        this.router.navigate(['/']);
         break;
       default:
         this.router.navigate(['/']);
