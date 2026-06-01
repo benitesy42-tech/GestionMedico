@@ -1,5 +1,5 @@
-import { Component, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, inject, signal, computed } from '@angular/core';
+import { Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { CitasService } from '../../../core/services/citas.service';
 import { DashboardService } from '../../../core/services/dashboard.service';
@@ -7,26 +7,28 @@ import { CitaView } from '../../../core/models/cita';
 
 @Component({
   selector: 'app-medico-dashboard',
-  imports: [RouterLink, DatePipe],
+  imports: [DatePipe],
   templateUrl: './medico-dashboard.html',
 })
 export default class MedicoDashboardComponent {
   private citasSvc = inject(CitasService);
   private dashSvc = inject(DashboardService);
+  private router = inject(Router);
 
   citasHoy = signal<CitaView[]>([]);
   stats = signal({ citasPendientes: 0, citasAtendidas: 0 });
   loading = signal(true);
+  updating = signal<number | null>(null);
 
-  constructor() {
-    this.citasSvc.getToday().subscribe((data) => {
-      this.citasHoy.set(data);
-      this.loading.set(false);
+  agenda = computed(() => {
+    const order: Record<string, number> = { Pendiente: 0, 'En Espera': 1, Atendida: 2, Cancelada: 3 };
+    return [...this.citasHoy()].sort((a, b) => {
+      const timeA = new Date(a.Fecha_Hora).getTime();
+      const timeB = new Date(b.Fecha_Hora).getTime();
+      if (timeA !== timeB) return timeA - timeB;
+      return (order[a.Estado] || 0) - (order[b.Estado] || 0);
     });
-    this.dashSvc.getStats().subscribe((data) =>
-      this.stats.set(data),
-    );
-  }
+  });
 
   get enEspera() {
     return this.citasHoy().filter((c) => c.Estado === 'En Espera');
@@ -34,5 +36,32 @@ export default class MedicoDashboardComponent {
 
   get atendidas() {
     return this.citasHoy().filter((c) => c.Estado === 'Atendida');
+  }
+
+  constructor() {
+    this.loadData();
+    this.dashSvc.getStats().subscribe((data) =>
+      this.stats.set(data),
+    );
+  }
+
+  loadData(): void {
+    this.loading.set(true);
+    this.citasSvc.getToday().subscribe((data) => {
+      this.citasHoy.set(data);
+      this.loading.set(false);
+    });
+  }
+
+  cambiarEstado(id: number, estado: string): void {
+    this.updating.set(id);
+    this.citasSvc.updateEstado(id, estado).subscribe(() => {
+      this.updating.set(null);
+      this.loadData();
+    });
+  }
+
+  irAconsulta(id: number): void {
+    this.router.navigate(['/medico/consulta', id]);
   }
 }

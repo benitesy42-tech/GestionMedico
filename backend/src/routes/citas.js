@@ -9,8 +9,8 @@ router.get('/', authenticateToken, async(req, res) => {
     try {
         const result = await pool.query(
             `SELECT c.ID_Cita, c.ID_Paciente, c.ID_Medico, c.Fecha_Hora, c.Estado,
-              p.Nombres || ' ' || p.Apellidos AS "PacienteNombre",
-              m.Nombres || ' ' || m.Apellidos AS "MedicoNombre",
+              p.Nombres || ' ' || p.Apellidos AS "Paciente_Nombre",
+              m.Nombres || ' ' || m.Apellidos AS "Medico_Nombre",
               e.Nombre_Especialidad AS "Especialidad"
        FROM Cita c
        JOIN Paciente p ON c.ID_Paciente = p.ID_Paciente
@@ -29,8 +29,8 @@ router.get('/hoy', authenticateToken, async(req, res) => {
     try {
         const result = await pool.query(
             `SELECT c.ID_Cita, c.ID_Paciente, c.ID_Medico, c.Fecha_Hora, c.Estado,
-              p.Nombres || ' ' || p.Apellidos AS "PacienteNombre",
-              m.Nombres || ' ' || m.Apellidos AS "MedicoNombre",
+              p.Nombres || ' ' || p.Apellidos AS "Paciente_Nombre",
+              m.Nombres || ' ' || m.Apellidos AS "Medico_Nombre",
               e.Nombre_Especialidad AS "Especialidad"
        FROM Cita c
        JOIN Paciente p ON c.ID_Paciente = p.ID_Paciente
@@ -50,7 +50,7 @@ router.get('/medico/:idMedico', authenticateToken, async(req, res) => {
     try {
         const { idMedico } = req.params;
         const result = await pool.query(
-            `SELECT c.*, p.Nombres || ' ' || p.Apellidos AS "PacienteNombre",
+            `SELECT c.*, p.Nombres || ' ' || p.Apellidos AS "Paciente_Nombre",
               e.Nombre_Especialidad AS "Especialidad"
        FROM Cita c
        JOIN Paciente p ON c.ID_Paciente = p.ID_Paciente
@@ -70,7 +70,7 @@ router.get('/paciente/:idPaciente', authenticateToken, async(req, res) => {
     try {
         const { idPaciente } = req.params;
         const result = await pool.query(
-            `SELECT c.*, m.Nombres || ' ' || m.Apellidos AS "MedicoNombre",
+            `SELECT c.*, m.Nombres || ' ' || m.Apellidos AS "Medico_Nombre",
               e.Nombre_Especialidad AS "Especialidad"
        FROM Cita c
        JOIN Medico m ON c.ID_Medico = m.ID_Medico
@@ -88,6 +88,10 @@ router.get('/paciente/:idPaciente', authenticateToken, async(req, res) => {
 router.post('/', authenticateToken, async(req, res) => {
     try {
         const { ID_Paciente, ID_Medico, Fecha_Hora } = req.body;
+
+        if (new Date(Fecha_Hora) <= new Date()) {
+            return res.status(400).json({ message: 'No se pueden agendar citas en el pasado o en el momento actual' });
+        }
 
         const conflicto = await pool.query(
             `SELECT * FROM Cita WHERE ID_Medico = $1 AND Fecha_Hora = $2 AND Estado NOT IN ('Cancelada')`, [ID_Medico, Fecha_Hora],

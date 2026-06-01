@@ -33,7 +33,10 @@ export default class RecepcionCitasComponent {
     Fecha_Hora: '',
   };
 
+  minDateTime = '';
+
   constructor() {
+    this.minDateTime = new Date().toISOString().slice(0, 16);
     this.loadCitas();
     this.medicosSvc.getAll().subscribe((data) => this.medicos.set(data));
     this.pacientesSvc.getAll().subscribe((data) => this.pacientes.set(data));
@@ -69,12 +72,25 @@ export default class RecepcionCitasComponent {
     this.showForm.set(false);
   }
 
+  errorMsg = signal('');
+
   save(): void {
+    if (new Date(this.form.Fecha_Hora) <= new Date()) {
+      this.errorMsg.set('No se puede agendar una cita en el pasado');
+      return;
+    }
     this.loading.set(true);
-    this.citasSvc.create(this.form).subscribe(() => {
-      this.loading.set(false);
-      this.showForm.set(false);
-      this.loadCitas();
+    this.errorMsg.set('');
+    this.citasSvc.create(this.form).subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.showForm.set(false);
+        this.loadCitas();
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.errorMsg.set(err.error?.message || 'Error al crear la cita');
+      },
     });
   }
 

@@ -1,14 +1,21 @@
-<div>
+<div class="animate-fade-in">
   @if (cita(); as c) {
-    <div class="mb-4">
-      <h4 class="fw-bold mb-1">Registrar Consulta</h4>
-      <p class="text-muted mb-0">
-        Atendiendo a <strong>{{ c.PacienteNombre }}</strong> - {{ c.Fecha_Hora | date:'dd/MM/yyyy HH:mm' }}
-      </p>
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+      <div>
+        <h4 class="fw-bold mb-1" style="color: #0c4a6e;">Registrar Consulta</h4>
+        <p class="text-muted mb-0">
+          Atendiendo a <strong>{{ c.Paciente_Nombre }}</strong> - {{ c.Fecha_Hora | date:'dd/MM/yyyy HH:mm' }}
+        </p>
+      </div>
+      <button class="btn btn-outline-info rounded-pill px-3" (click)="verHistorial()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Ver Historial Clínico
+      </button>
     </div>
 
-    <div class="card border-0 shadow-sm">
+    <div class="card border-0 shadow-sm mb-4">
       <div class="card-body">
+        <h6 class="fw-bold mb-3 section-title">Motivo y Diagnóstico</h6>
         <div class="mb-3">
           <label class="form-label fw-semibold">Motivo de Consulta</label>
           <textarea class="form-control" rows="2" [(ngModel)]="form.Motivo" placeholder="Describa el motivo..."></textarea>
@@ -18,19 +25,111 @@
           <textarea class="form-control" rows="3" [(ngModel)]="form.Sintomas" placeholder="Síntomas del paciente..."></textarea>
         </div>
         <div class="mb-3">
-          <label class="form-label fw-semibold">Diagnóstico / Notas</label>
+          <label class="form-label fw-semibold">Diagnóstico</label>
           <textarea class="form-control" rows="4" [(ngModel)]="form.Diagnostico_Notas" placeholder="Diagnóstico y notas médicas..."></textarea>
-        </div>
-        <div class="d-flex gap-2">
-          <button class="btn btn-success" (click)="finalizar()" [disabled]="loading() || !form.Motivo || !form.Diagnostico_Notas">
-            @if (loading()) { <span class="spinner-border spinner-border-sm me-1"></span> }
-            Finalizar Consulta
-          </button>
-          <button class="btn btn-secondary" (click)="goBack()">Cancelar</button>
         </div>
       </div>
     </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3 section-title">Signos Vitales</h6>
+        <div class="row g-3">
+          <div class="col-6 col-md-4 col-lg-3">
+            <label class="form-label fw-semibold small">Presión Arterial</label>
+            <input class="form-control" [(ngModel)]="form.Signos_Vitales.Presion_Arterial" placeholder="Ej: 120/80" />
+          </div>
+          <div class="col-6 col-md-4 col-lg-3">
+            <label class="form-label fw-semibold small">Frec. Cardíaca (lpm)</label>
+            <input type="number" class="form-control" [(ngModel)]="form.Signos_Vitales.Frecuencia_Cardiaca" placeholder="72" />
+          </div>
+          <div class="col-6 col-md-4 col-lg-3">
+            <label class="form-label fw-semibold small">Temperatura (°C)</label>
+            <input type="number" step="0.1" class="form-control" [(ngModel)]="form.Signos_Vitales.Temperatura" placeholder="36.5" />
+          </div>
+          <div class="col-6 col-md-4 col-lg-3">
+            <label class="form-label fw-semibold small">Peso (kg)</label>
+            <input type="number" step="0.1" class="form-control" [(ngModel)]="form.Signos_Vitales.Peso" placeholder="70" />
+          </div>
+          <div class="col-6 col-md-4 col-lg-3">
+            <label class="form-label fw-semibold small">Estatura (cm)</label>
+            <input type="number" step="0.1" class="form-control" [(ngModel)]="form.Signos_Vitales.Estatura" placeholder="170" />
+          </div>
+          <div class="col-6 col-md-4 col-lg-3">
+            <label class="form-label fw-semibold small">Frec. Respiratoria (rpm)</label>
+            <input type="number" class="form-control" [(ngModel)]="form.Signos_Vitales.Frecuencia_Respiratoria" placeholder="16" />
+          </div>
+          <div class="col-6 col-md-4 col-lg-3">
+            <label class="form-label fw-semibold small">Saturación O₂ (%)</label>
+            <input type="number" class="form-control" [(ngModel)]="form.Signos_Vitales.Saturacion_Oxigeno" placeholder="98" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <h6 class="fw-bold mb-3 section-title">Tratamiento y Observaciones</h6>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Tratamiento Indicado</label>
+          <textarea class="form-control" rows="3" [(ngModel)]="form.Tratamiento" placeholder="Describa el tratamiento indicado..."></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Observaciones Médicas</label>
+          <textarea class="form-control" rows="3" [(ngModel)]="form.Observaciones" placeholder="Observaciones adicionales..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h6 class="fw-bold mb-0 section-title">Medicamentos Recetados</h6>
+          <button class="btn btn-sm btn-outline-primary rounded-pill px-3" (click)="agregarReceta()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Agregar Medicamento
+          </button>
+        </div>
+        @if (form.Recetas.length === 0) {
+          <p class="text-muted small mb-0">No se han agregado medicamentos. Haga clic en "Agregar Medicamento" si desea recetar.</p>
+        }
+        @for (r of form.Recetas; track $index) {
+          <div class="row g-2 align-items-end mb-2 p-3 rounded-3" style="background: #f8f9fa;">
+            <div class="col-12 col-md-4">
+              <label class="form-label small fw-semibold">Medicamento</label>
+              <input class="form-control form-control-sm" [(ngModel)]="r.Medicamento" placeholder="Nombre del medicamento" />
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small fw-semibold">Dosis</label>
+              <input class="form-control form-control-sm" [(ngModel)]="r.Dosis" placeholder="Ej: 500mg" />
+            </div>
+            <div class="col-6 col-md-3">
+              <label class="form-label small fw-semibold">Frecuencia</label>
+              <input class="form-control form-control-sm" [(ngModel)]="r.Frecuencia" placeholder="Ej: Cada 8 horas" />
+            </div>
+            <div class="col-6 col-md-2">
+              <label class="form-label small fw-semibold">Duración</label>
+              <input class="form-control form-control-sm" [(ngModel)]="r.Duracion" placeholder="Ej: 7 días" />
+            </div>
+            <div class="col-6 col-md-1 d-flex align-items-center">
+              <button class="btn btn-sm btn-outline-danger rounded-circle p-1" style="width: 32px; height: 32px;" (click)="eliminarReceta($index)" title="Eliminar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button class="btn btn-success rounded-pill px-4 shadow-sm" (click)="finalizar()" [disabled]="loading() || !form.Motivo || !form.Diagnostico_Notas">
+        @if (loading()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><polyline points="20 6 9 17 4 12"/></svg>
+        Finalizar Consulta
+      </button>
+      <button class="btn btn-secondary rounded-pill px-3" (click)="goBack()">Cancelar</button>
+    </div>
   } @else {
-    <div class="alert alert-warning">Cita no encontrada</div>
+    <div class="alert alert-warning animate-slide-down">Cita no encontrada</div>
   }
 </div>

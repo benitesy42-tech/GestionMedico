@@ -7,8 +7,15 @@ import { ConsultaMedica } from '../models/consulta';
 export class ConsultasService {
   constructor(private api: ApiService) {}
 
-  getHistorialByPaciente(idPaciente: number): Observable<ConsultaMedica[]> {
-    return this.api.get<ConsultaMedica[]>(`/consultas/paciente/${idPaciente}`);
+  getHistorialByPaciente(idPaciente: number, desde?: string, hasta?: string): Observable<ConsultaMedica[]> {
+    let params = '';
+    if (desde || hasta) {
+      const q = new URLSearchParams();
+      if (desde) q.set('desde', desde);
+      if (hasta) q.set('hasta', hasta);
+      params = '?' + q.toString();
+    }
+    return this.api.get<ConsultaMedica[]>(`/consultas/paciente/${idPaciente}${params}`);
   }
 
   create(data: ConsultaMedica): Observable<ConsultaMedica> {

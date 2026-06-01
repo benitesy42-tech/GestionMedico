@@ -1,17 +1,35 @@
 <div class="d-flex" style="min-height: 100dvh;">
-  <nav class="d-flex flex-column flex-shrink-0 text-white sidebar-nav" style="width: 260px; background: linear-gradient(180deg, #0c4a6e 0%, #0a3d5c 100%);">
-    <div class="p-4 border-bottom border-white border-opacity-10">
+  <div
+    class="sidebar-backdrop"
+    [class.show]="sidebarOpen()"
+    (click)="closeSidebar()"
+  ></div>
+
+  <nav
+    class="d-flex flex-column flex-shrink-0 text-white sidebar-nav"
+    [class.open]="sidebarOpen()"
+    style="background: linear-gradient(180deg, #0c4a6e 0%, #0a3d5c 100%);"
+  >
+    <div class="p-4 border-bottom border-white border-opacity-10 d-flex align-items-center justify-content-between">
       <div class="d-flex align-items-center gap-2">
-        <div class="bg-white rounded-2 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+        <div class="bg-white rounded-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px;">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0c4a6e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
           </svg>
         </div>
-        <div>
-          <h6 class="mb-0 fw-bold" style="font-size: 1rem;">{{ title }}</h6>
-          <small class="opacity-60" style="font-size: 0.7rem;">{{ roleName }}</small>
+        <div class="overflow-hidden">
+          <h6 class="mb-0 fw-bold text-truncate" style="font-size: 1rem;">{{ title }}</h6>
+          <small class="opacity-60 text-truncate" style="font-size: 0.7rem;">{{ roleName }}</small>
         </div>
       </div>
+      <button
+        class="btn d-md-none p-0 text-white border-0"
+        (click)="closeSidebar()"
+        style="background: none; font-size: 1.2rem;"
+        aria-label="Cerrar menú"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
 
     <div class="flex-grow-1 py-3 overflow-auto">
@@ -21,7 +39,8 @@
           class="d-flex align-items-center gap-3 px-4 py-3 text-white text-decoration-none nav-link-custom"
           routerLinkActive="active fw-semibold"
           [routerLinkActiveOptions]="{ exact: true }"
-          style="font-size: 0.875rem; transition: all 0.2s;"
+          style="font-size: 0.875rem;"
+          (click)="closeSidebar()"
         >
           <i [class]="item.icon" style="font-size: 1.1rem; width: 22px;"></i>
           <span>{{ item.label }}</span>
@@ -39,14 +58,37 @@
           <div class="opacity-75 text-truncate" style="font-size: 0.7rem;">{{ auth.userRole() || 'Sin rol' }}</div>
         </div>
       </div>
-      <button class="btn btn-outline-light btn-sm w-100 py-2 d-flex align-items-center justify-content-center gap-2" (click)="logout()" style="border-radius: 8px; font-size: 0.8rem; opacity: 0.8;">
+      <button class="btn btn-outline-light btn-sm w-100 py-2 d-flex align-items-center justify-content-center gap-2" (click)="logout()" style="border-radius: 10px; font-size: 0.8rem; opacity: 0.85;">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Cerrar Sesión
       </button>
     </div>
   </nav>
 
-  <main class="flex-grow-1 p-4" style="overflow-y: auto; background: #f0f2f5; min-height: 100dvh;">
-    <router-outlet />
+  <main class="flex-grow-1 d-flex flex-column" style="overflow-y: auto; background: #f0f2f5; min-height: 100dvh;">
+    <div class="d-flex align-items-center gap-3 px-4 py-2 d-md-none bg-white border-bottom" style="position: sticky; top: 0; z-index: 1020;">
+      <button
+        class="btn p-1 border-0 sidebar-toggle d-none"
+        (click)="toggleSidebar()"
+        style="background: none; font-size: 1.3rem; color: #0c4a6e;"
+        aria-label="Abrir menú"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="d-flex align-items-center gap-2">
+        <div class="bg-white rounded-2 d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm" style="width: 32px; height: 32px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0c4a6e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        </div>
+        <div>
+          <div class="fw-semibold" style="font-size: 0.85rem; color: #0c4a6e;">{{ title }}</div>
+          <div class="text-muted" style="font-size: 0.7rem;">{{ roleName }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="p-3 p-md-4 flex-grow-1">
+      <router-outlet />
+    </div>
   </main>
 </div>

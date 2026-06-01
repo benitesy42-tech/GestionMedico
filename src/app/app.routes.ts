@@ -20,6 +20,7 @@ const recepcionNav: NavItem[] = [
 
 const medicoNav: NavItem[] = [
   { label: 'Mi Agenda', route: '/medico', icon: 'bi-calendar-week' },
+  { label: 'Historial Clínico', route: '/medico/historial', icon: 'bi-journal-text' },
 ];
 
 export const routes: Routes = [
@@ -65,6 +66,8 @@ export const routes: Routes = [
     children: [
       { path: '', loadComponent: () => import('./features/medico/dashboard/medico-dashboard') },
       { path: 'consulta/:idCita', loadComponent: () => import('./features/medico/consulta/medico-consulta') },
+      { path: 'historial', loadComponent: () => import('./features/medico/historial/historial-clinico') },
+      { path: 'historial/paciente/:idPaciente', loadComponent: () => import('./features/medico/historial/historial-clinico') },
     ],
   },
   {

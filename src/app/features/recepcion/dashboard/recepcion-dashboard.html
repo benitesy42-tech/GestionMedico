@@ -10,8 +10,8 @@
       <p class="text-muted mt-2">Cargando citas del día...</p>
     </div>
   } @else {
-    <div class="row g-3 mb-4">
-      <div class="col-md-3 col-6">
+    <div class="row g-3 mb-4 stagger-children">
+      <div class="col-6 col-md-3">
         <div class="card border-0 h-100 dashboard-card" style="background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);">
           <div class="card-body">
             <p class="text-white text-opacity-75 small mb-1">Citas Hoy</p>
@@ -19,7 +19,7 @@
           </div>
         </div>
       </div>
-      <div class="col-md-3 col-6">
+      <div class="col-6 col-md-3">
         <div class="card border-0 h-100 dashboard-card" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);">
           <div class="card-body">
             <p class="text-white text-opacity-75 small mb-1">Pendientes</p>
@@ -27,7 +27,7 @@
           </div>
         </div>
       </div>
-      <div class="col-md-3 col-6">
+      <div class="col-6 col-md-3">
         <div class="card border-0 h-100 dashboard-card" style="background: linear-gradient(135deg, #198754 0%, #20c997 100%);">
           <div class="card-body">
             <p class="text-white text-opacity-75 small mb-1">Atendidas</p>
@@ -35,7 +35,7 @@
           </div>
         </div>
       </div>
-      <div class="col-md-3 col-6">
+      <div class="col-6 col-md-3">
         <div class="card border-0 h-100 dashboard-card" style="background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);">
           <div class="card-body">
             <p class="text-white text-opacity-75 small mb-1">Ingresos Hoy</p>
@@ -84,8 +84,8 @@
             @for (c of citasHoy(); track c.ID_Cita) {
               <tr class="align-middle">
                 <td><span class="fw-semibold">{{ c.Fecha_Hora | date:'HH:mm' }}</span></td>
-                <td>{{ c.PacienteNombre }}</td>
-                <td>{{ c.MedicoNombre }}</td>
+                <td>{{ c.Paciente_Nombre }}</td>
+                <td>{{ c.Medico_Nombre }}</td>
                 <td>{{ c.Especialidad }}</td>
                 <td>
                   <span class="badge {{ getBadgeClass(c.Estado) }} rounded-pill">{{ c.Estado }}</span>

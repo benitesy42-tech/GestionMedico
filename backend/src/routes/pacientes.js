@@ -23,7 +23,7 @@ router.get('/buscar/:term', authenticateToken, async(req, res) => {
         const { term } = req.params;
         const result = await pool.query(
             `SELECT * FROM Paciente
-       WHERE DNI ILIKE $1 OR Nombres ILIKE $1 OR Apellidos ILIKE $1
+       WHERE DNI ILIKE $1 OR Nombres ILIKE $1 OR Apellidos ILIKE $1 OR ID_Paciente::text ILIKE $1
        ORDER BY Apellidos
        LIMIT 20`, [`%${term}%`],
         );

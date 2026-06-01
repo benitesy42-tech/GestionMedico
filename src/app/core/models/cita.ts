@@ -14,7 +14,7 @@ export interface CitaDto {
 }
 
 export interface CitaView extends Cita {
-  PacienteNombre: string;
-  MedicoNombre: string;
+  Paciente_Nombre: string;
+  Medico_Nombre: string;
   Especialidad: string;
 }
