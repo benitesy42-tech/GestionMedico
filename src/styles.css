@@ -36,11 +36,14 @@ body {
   backdrop-filter: blur(4px);
   z-index: 1039;
   opacity: 0;
+  pointer-events: none;
   transition: opacity var(--transition-base);
 }
 
 .sidebar-backdrop.show {
+  display: block;
   opacity: 1;
+  pointer-events: auto;
 }
 
 .sidebar-toggle {
@@ -59,11 +62,6 @@ body {
   .sidebar-nav.open {
     transform: translateX(0);
   }
-
-  .sidebar-backdrop {
-    display: block;
-  }
-
   .sidebar-toggle {
     display: flex !important;
   }
