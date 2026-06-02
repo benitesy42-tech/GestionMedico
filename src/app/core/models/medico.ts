@@ -5,6 +5,7 @@ export interface Medico {
   Nombres: string;
   Apellidos: string;
   Numero_Colegiatura: string;
+  Nombre_Especialidad?: string;
 }
 
 export interface MedicoDto {

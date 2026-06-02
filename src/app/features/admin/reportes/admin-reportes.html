@@ -20,6 +20,9 @@
             Generar Reporte
           </button>
         </div>
+        @if (errorMsg()) {
+          <div class="col-12"><div class="alert alert-danger py-2 mb-0 animate-slide-down">{{ errorMsg() }}</div></div>
+        }
       </div>
     </div>
   </div>

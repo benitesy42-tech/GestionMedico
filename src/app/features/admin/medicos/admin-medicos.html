@@ -64,6 +64,7 @@
             <th>#</th>
             <th>Nombres</th>
             <th>Apellidos</th>
+            <th>Especialidad</th>
             <th>Colegiatura</th>
             <th>Acciones</th>
           </tr>
@@ -74,6 +75,7 @@
               <td>{{ m.ID_Medico }}</td>
               <td>{{ m.Nombres }}</td>
               <td>{{ m.Apellidos }}</td>
+              <td><span class="badge bg-info bg-opacity-10 text-info rounded-pill">{{ m.Nombre_Especialidad }}</span></td>
               <td>{{ m.Numero_Colegiatura }}</td>
               <td>
                 <button class="btn btn-sm btn-outline-primary me-1" (click)="openEdit(m)">✏️</button>
@@ -81,7 +83,7 @@
               </td>
             </tr>
           } @empty {
-            <tr><td colspan="5" class="text-center py-4 text-muted">No hay médicos registrados</td></tr>
+            <tr><td colspan="6" class="text-center py-4 text-muted">No hay médicos registrados</td></tr>
           }
         </tbody>
       </table>

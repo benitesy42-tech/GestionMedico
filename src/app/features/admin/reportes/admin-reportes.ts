@@ -18,13 +18,19 @@ export default class AdminReportesComponent {
   total = signal(0);
   loading = signal(false);
   showReporte = signal(false);
+  errorMsg = signal('');
 
   formatMonto(monto: number | string): string {
     return Number(monto).toFixed(2);
   }
 
   generateReporte(): void {
+    this.errorMsg.set('');
     if (!this.fechaInicio() || !this.fechaFin()) return;
+    if (this.fechaInicio() > this.fechaFin()) {
+      this.errorMsg.set('La fecha de inicio no puede ser mayor que la fecha final');
+      return;
+    }
     this.loading.set(true);
     this.pagosSvc.getReporte(this.fechaInicio(), this.fechaFin()).subscribe((data) => {
       this.pagos.set(data);

@@ -41,7 +41,7 @@ router.post('/', authenticateToken, async(req, res) => {
     try {
         const { ID_Consulta, Monto } = req.body;
 
-        if (!ID_Consulta || Monto === undefined || Monto < 0) {
+        if (!ID_Consulta || ID_Consulta < 1 || Monto === undefined || Monto <= 0) {
             return res.status(400).json({ message: 'ID de consulta y monto válido son requeridos' });
         }
 

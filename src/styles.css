@@ -22,10 +22,22 @@ body {
 
 /* ─── Layout ─── */
 
+.sidebar-root {
+  display: flex;
+  height: 100dvh;
+  overflow: hidden;
+}
+
 .sidebar-nav {
   width: var(--sidebar-width);
+  height: 100dvh;
   transition: transform var(--transition-base) var(--ease-out-expo);
   z-index: 1040;
+}
+
+.sidebar-main {
+  overflow-y: auto;
+  background: #f0f2f5;
 }
 
 .sidebar-backdrop {
