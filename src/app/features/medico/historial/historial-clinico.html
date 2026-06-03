@@ -100,11 +100,11 @@
           <div class="row g-3 align-items-end">
             <div class="col-6 col-md-3">
               <label class="form-label small fw-semibold">Desde</label>
-              <input type="date" class="form-control form-control-sm" [(ngModel)]="filtroDesde" />
+              <input type="date" class="form-control form-control-sm" [(ngModel)]="filtroDesde" [max]="today" />
             </div>
             <div class="col-6 col-md-3">
               <label class="form-label small fw-semibold">Hasta</label>
-              <input type="date" class="form-control form-control-sm" [(ngModel)]="filtroHasta" />
+              <input type="date" class="form-control form-control-sm" [(ngModel)]="filtroHasta" [max]="today" />
             </div>
             <div class="col-12 col-md-4">
               <label class="form-label small fw-semibold">Buscar en atenciones</label>

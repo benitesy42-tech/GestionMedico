@@ -19,6 +19,7 @@ export default class AdminReportesComponent {
   loading = signal(false);
   showReporte = signal(false);
   errorMsg = signal('');
+  today = new Date().toISOString().split('T')[0];
 
   formatMonto(monto: number | string): string {
     return Number(monto).toFixed(2);

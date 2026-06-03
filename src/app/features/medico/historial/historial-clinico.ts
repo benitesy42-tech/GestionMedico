@@ -29,6 +29,7 @@ export default class HistorialClinicoComponent {
   filtroDesde = signal('');
   filtroHasta = signal('');
   filtroTexto = signal('');
+  today = new Date().toISOString().split('T')[0];
 
   historialFiltrado = computed(() => {
     const items = this.historial();
@@ -103,6 +104,9 @@ export default class HistorialClinicoComponent {
   }
 
   aplicarFiltros(): void {
+    if (this.filtroDesde() && this.filtroHasta() && this.filtroDesde() > this.filtroHasta()) {
+      return;
+    }
     const pac = this.selectedPaciente();
     if (pac) {
       this.cargarHistorial(pac.ID_Paciente);

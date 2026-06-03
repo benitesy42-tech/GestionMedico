@@ -8,11 +8,11 @@
       <div class="row g-3 align-items-end">
         <div class="col-md-4">
           <label class="form-label">Fecha Inicio</label>
-          <input type="date" class="form-control" [(ngModel)]="fechaInicio" />
+          <input type="date" class="form-control" [(ngModel)]="fechaInicio" [max]="today" />
         </div>
         <div class="col-md-4">
           <label class="form-label">Fecha Fin</label>
-          <input type="date" class="form-control" [(ngModel)]="fechaFin" />
+          <input type="date" class="form-control" [(ngModel)]="fechaFin" [max]="today" />
         </div>
         <div class="col-md-auto">
           <button class="btn btn-primary" (click)="generateReporte()" [disabled]="loading() || !fechaInicio() || !fechaFin()">
