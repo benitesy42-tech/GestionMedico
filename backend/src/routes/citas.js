@@ -32,11 +32,13 @@ router.get('/fecha/:fecha', authenticateToken, async(req, res) => {
             `SELECT c.ID_Cita, c.ID_Paciente, c.ID_Medico, c.Fecha_Hora, c.Estado,
               p.Nombres || ' ' || p.Apellidos AS "Paciente_Nombre",
               m.Nombres || ' ' || m.Apellidos AS "Medico_Nombre",
-              e.Nombre_Especialidad AS "Especialidad"
+              e.Nombre_Especialidad AS "Especialidad",
+              cm.ID_Consulta
        FROM Cita c
        JOIN Paciente p ON c.ID_Paciente = p.ID_Paciente
        JOIN Medico m ON c.ID_Medico = m.ID_Medico
        JOIN Especialidad e ON m.ID_Especialidad = e.ID_Especialidad
+       LEFT JOIN Consulta_Medica cm ON c.ID_Cita = cm.ID_Cita
        WHERE DATE(c.Fecha_Hora) = $1
        ORDER BY c.Fecha_Hora`, [fecha],
         );

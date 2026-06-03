@@ -18,7 +18,7 @@ export default class RecepcionDashboardComponent {
   citas = signal<CitaView[]>([]);
   stats = signal({ citasHoy: 0, citasPendientes: 0, citasAtendidas: 0, ingresosHoy: 0 });
   loading = signal(true);
-  fechaSeleccionada = signal(new Date().toISOString().split('T')[0]);
+  fechaSeleccionada = signal(new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0]);
 
   tituloFecha = computed(() => {
     const hoy = new Date();

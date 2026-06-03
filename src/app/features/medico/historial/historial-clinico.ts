@@ -29,7 +29,7 @@ export default class HistorialClinicoComponent {
   filtroDesde = signal('');
   filtroHasta = signal('');
   filtroTexto = signal('');
-  today = new Date().toISOString().split('T')[0];
+  today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
 
   historialFiltrado = computed(() => {
     const items = this.historial();

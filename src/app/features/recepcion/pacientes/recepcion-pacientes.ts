@@ -17,7 +17,7 @@ export default class RecepcionPacientesComponent {
   editing = signal(false);
   selectedId = signal<number | null>(null);
   loading = signal(false);
-  today = new Date().toISOString().split('T')[0];
+  today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
 
   form: Paciente = {
     ID_Paciente: 0,

@@ -52,7 +52,7 @@ export default class MedicoDashboardComponent {
     const idMedico = this.auth.currentUser()?.idMedico;
     if (!idMedico) return;
     this.citasSvc.getByMedico(idMedico).subscribe((data) => {
-      const hoy = new Date().toISOString().split('T')[0];
+      const hoy = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
       this.citasHoy.set(data.filter(c => c.Fecha_Hora.startsWith(hoy)));
       this.loading.set(false);
     });

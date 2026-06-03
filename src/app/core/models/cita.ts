@@ -17,4 +17,5 @@ export interface CitaView extends Cita {
   Paciente_Nombre: string;
   Medico_Nombre: string;
   Especialidad: string;
+  ID_Consulta?: number;
 }
