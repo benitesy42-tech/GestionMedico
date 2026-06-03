@@ -78,23 +78,38 @@ export default class AdminMedicosComponent {
         Nombres: this.form.Nombres,
         Apellidos: this.form.Apellidos,
         Numero_Colegiatura: this.form.Numero_Colegiatura,
-      }).subscribe(() => {
-        this.loading.set(false);
-        this.showForm.set(false);
-        this.loadData();
+      }).subscribe({
+        next: () => {
+          this.loading.set(false);
+          this.showForm.set(false);
+          this.loadData();
+        },
+        error: () => {
+          this.loading.set(false);
+          alert('Error al actualizar médico');
+        },
       });
     } else {
-      this.medicosSvc.create(this.form).subscribe(() => {
-        this.loading.set(false);
-        this.showForm.set(false);
-        this.loadData();
+      this.medicosSvc.create(this.form).subscribe({
+        next: () => {
+          this.loading.set(false);
+          this.showForm.set(false);
+          this.loadData();
+        },
+        error: () => {
+          this.loading.set(false);
+          alert('Error al crear médico. Verifica que el usuario o colegiatura no estén duplicados.');
+        },
       });
     }
   }
 
   delete(id: number): void {
     if (confirm('¿Está seguro de eliminar este médico?')) {
-      this.medicosSvc.delete(id).subscribe(() => this.loadData());
+      this.medicosSvc.delete(id).subscribe({
+        next: () => this.loadData(),
+        error: () => alert('Error al eliminar médico'),
+      });
     }
   }
 }

@@ -50,16 +50,31 @@ router.post('/', authenticateToken, async(req, res) => {
 
         const hashedPassword = await bcrypt.hash(Password, 10);
 
-        const userResult = await client.query(
-            `INSERT INTO Usuario (ID_Rol, Username_Correo, Password_Hash, Estado_Activo)
-       VALUES ((SELECT ID_Rol FROM Rol WHERE Nombre_Rol = 'Médico'), $1, $2, true)
-       RETURNING ID_Usuario`, [Username_Correo, hashedPassword],
+        const existingUser = await client.query(
+            `SELECT ID_Usuario FROM Usuario WHERE Username_Correo = $1 AND Estado_Activo = false`,
+            [Username_Correo],
         );
+
+        let idUsuario;
+        if (existingUser.rows.length > 0) {
+            idUsuario = existingUser.rows[0].id_usuario;
+            await client.query(
+                `UPDATE Usuario SET Password_Hash = $1, Estado_Activo = true WHERE ID_Usuario = $2`,
+                [hashedPassword, idUsuario],
+            );
+        } else {
+            const userResult = await client.query(
+                `INSERT INTO Usuario (ID_Rol, Username_Correo, Password_Hash, Estado_Activo)
+           VALUES ((SELECT ID_Rol FROM Rol WHERE Nombre_Rol = 'Médico'), $1, $2, true)
+           RETURNING ID_Usuario`, [Username_Correo, hashedPassword],
+            );
+            idUsuario = userResult.rows[0].id_usuario;
+        }
 
         const medicoResult = await client.query(
             `INSERT INTO Medico (ID_Usuario, ID_Especialidad, Nombres, Apellidos, Numero_Colegiatura)
        VALUES ($1, $2, $3, $4, $5)
-       RETURNING *`, [userResult.rows[0].id_usuario, ID_Especialidad, Nombres, Apellidos, Numero_Colegiatura],
+       RETURNING *`, [idUsuario, ID_Especialidad, Nombres, Apellidos, Numero_Colegiatura],
         );
 
         await client.query('COMMIT');
