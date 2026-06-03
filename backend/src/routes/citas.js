@@ -25,6 +25,28 @@ router.get('/', authenticateToken, async(req, res) => {
     }
 });
 
+router.get('/fecha/:fecha', authenticateToken, async(req, res) => {
+    try {
+        const { fecha } = req.params;
+        const result = await pool.query(
+            `SELECT c.ID_Cita, c.ID_Paciente, c.ID_Medico, c.Fecha_Hora, c.Estado,
+              p.Nombres || ' ' || p.Apellidos AS "Paciente_Nombre",
+              m.Nombres || ' ' || m.Apellidos AS "Medico_Nombre",
+              e.Nombre_Especialidad AS "Especialidad"
+       FROM Cita c
+       JOIN Paciente p ON c.ID_Paciente = p.ID_Paciente
+       JOIN Medico m ON c.ID_Medico = m.ID_Medico
+       JOIN Especialidad e ON m.ID_Especialidad = e.ID_Especialidad
+       WHERE DATE(c.Fecha_Hora) = $1
+       ORDER BY c.Fecha_Hora`, [fecha],
+        );
+        res.json(normalizeRows(result.rows));
+    } catch (error) {
+        console.error('Error al obtener citas por fecha:', error);
+        res.status(500).json({ message: 'Error al obtener citas por fecha' });
+    }
+});
+
 router.get('/hoy', authenticateToken, async(req, res) => {
     try {
         const result = await pool.query(

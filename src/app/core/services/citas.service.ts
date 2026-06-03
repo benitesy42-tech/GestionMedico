@@ -19,6 +19,10 @@ export class CitasService {
     return this.api.get<CitaView[]>(`/citas/paciente/${idPaciente}`);
   }
 
+  getByDate(fecha: string): Observable<CitaView[]> {
+    return this.api.get<CitaView[]>(`/citas/fecha/${fecha}`);
+  }
+
   getToday(): Observable<CitaView[]> {
     return this.api.get<CitaView[]>('/citas/hoy');
   }

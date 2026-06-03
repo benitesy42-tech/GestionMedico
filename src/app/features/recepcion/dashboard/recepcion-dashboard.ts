@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { CitasService } from '../../../core/services/citas.service';
@@ -7,30 +8,41 @@ import { CitaView } from '../../../core/models/cita';
 
 @Component({
   selector: 'app-recepcion-dashboard',
-  imports: [RouterLink, DatePipe],
+  imports: [FormsModule, RouterLink, DatePipe],
   templateUrl: './recepcion-dashboard.html',
 })
 export default class RecepcionDashboardComponent {
   private citasSvc = inject(CitasService);
   private dashSvc = inject(DashboardService);
 
-  citasHoy = signal<CitaView[]>([]);
+  citas = signal<CitaView[]>([]);
   stats = signal({ citasHoy: 0, citasPendientes: 0, citasAtendidas: 0, ingresosHoy: 0 });
   loading = signal(true);
+  fechaSeleccionada = signal(new Date().toISOString().split('T')[0]);
 
   constructor() {
-    this.citasSvc.getToday().subscribe((data) => {
-      this.citasHoy.set(data);
-      this.loading.set(false);
-    });
+    this.cargarCitas();
     this.dashSvc.getStats().subscribe((data) =>
       this.stats.set(data),
     );
   }
 
+  cargarCitas(): void {
+    this.loading.set(true);
+    this.citasSvc.getByDate(this.fechaSeleccionada()).subscribe((data) => {
+      this.citas.set(data);
+      this.loading.set(false);
+    });
+  }
+
+  cambiarFecha(fecha: string): void {
+    this.fechaSeleccionada.set(fecha);
+    this.cargarCitas();
+  }
+
   marcarEnEspera(id: number): void {
     this.citasSvc.updateEstado(id, 'En Espera').subscribe(() =>
-      this.citasSvc.getToday().subscribe((data) => this.citasHoy.set(data)),
+      this.cargarCitas(),
     );
   }
 
