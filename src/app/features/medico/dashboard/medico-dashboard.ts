@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { CitasService } from '../../../core/services/citas.service';
 import { DashboardService } from '../../../core/services/dashboard.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { CitaView } from '../../../core/models/cita';
 
 @Component({
@@ -14,6 +15,7 @@ export default class MedicoDashboardComponent {
   private citasSvc = inject(CitasService);
   private dashSvc = inject(DashboardService);
   private router = inject(Router);
+  private auth = inject(AuthService);
 
   citasHoy = signal<CitaView[]>([]);
   stats = signal({ citasPendientes: 0, citasAtendidas: 0 });
@@ -47,8 +49,11 @@ export default class MedicoDashboardComponent {
 
   loadData(): void {
     this.loading.set(true);
-    this.citasSvc.getToday().subscribe((data) => {
-      this.citasHoy.set(data);
+    const idMedico = this.auth.currentUser()?.idMedico;
+    if (!idMedico) return;
+    this.citasSvc.getByMedico(idMedico).subscribe((data) => {
+      const hoy = new Date().toISOString().split('T')[0];
+      this.citasHoy.set(data.filter(c => c.Fecha_Hora.startsWith(hoy)));
       this.loading.set(false);
     });
   }

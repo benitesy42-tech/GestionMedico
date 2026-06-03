@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConsultasService } from '../../../core/services/consultas.service';
 import { CitasService } from '../../../core/services/citas.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { CitaView } from '../../../core/models/cita';
 
 @Component({
@@ -17,6 +18,7 @@ export default class MedicoConsultaComponent {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private location = inject(Location);
+  private auth = inject(AuthService);
 
   cita = signal<CitaView | null>(null);
   loading = signal(false);
@@ -42,10 +44,13 @@ export default class MedicoConsultaComponent {
 
   constructor() {
     this.idCita = Number(this.route.snapshot.paramMap.get('idCita'));
-    this.citasSvc.getAll().subscribe((citas) => {
-      const found = citas.find((c) => c.ID_Cita === this.idCita);
-      this.cita.set(found || null);
-    });
+    const idMedico = this.auth.currentUser()?.idMedico;
+    if (idMedico) {
+      this.citasSvc.getByMedico(idMedico).subscribe((citas) => {
+        const found = citas.find((c) => c.ID_Cita === this.idCita);
+        this.cita.set(found || null);
+      });
+    }
   }
 
   agregarReceta(): void {

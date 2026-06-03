@@ -43,12 +43,14 @@ router.post('/login', async (req, res) => {
 
     let nombreCompleto = '';
 
+    let idMedico = null;
     if (usuario.nombre_rol === 'Médico' || usuario.nombre_rol === 'Medico') {
       const medico = await pool.query(
-        'SELECT Nombres, Apellidos FROM Medico WHERE ID_Usuario = $1',
+        'SELECT ID_Medico, Nombres, Apellidos FROM Medico WHERE ID_Usuario = $1',
         [usuario.id_usuario],
       );
       if (medico.rows.length > 0) {
+        idMedico = medico.rows[0].id_medico;
         nombreCompleto = `${medico.rows[0].nombres} ${medico.rows[0].apellidos}`;
       }
     } else if (usuario.nombre_rol === 'Paciente') {
@@ -75,6 +77,7 @@ router.post('/login', async (req, res) => {
       },
       nombreCompleto,
       rol: usuario.nombre_rol,
+      idMedico,
     });
   } catch (error) {
     console.error('Error en login:', error);
