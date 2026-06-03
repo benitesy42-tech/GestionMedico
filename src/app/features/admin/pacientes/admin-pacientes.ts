@@ -17,6 +17,7 @@ export default class AdminPacientesComponent {
   editing = signal(false);
   selectedId = signal<number | null>(null);
   loading = signal(false);
+  today = new Date().toISOString().split('T')[0];
 
   form: Paciente = {
     ID_Paciente: 0,
@@ -65,19 +66,20 @@ export default class AdminPacientesComponent {
 
   save(): void {
     this.loading.set(true);
-    if (this.editing() && this.selectedId()) {
-      this.pacientesSvc.update(this.selectedId()!, this.form).subscribe(() => {
+    const obs = this.editing() && this.selectedId()
+      ? this.pacientesSvc.update(this.selectedId()!, this.form)
+      : this.pacientesSvc.create(this.form);
+    obs.subscribe({
+      next: () => {
         this.loading.set(false);
         this.showForm.set(false);
         this.loadPacientes();
-      });
-    } else {
-      this.pacientesSvc.create(this.form).subscribe(() => {
+      },
+      error: (err) => {
         this.loading.set(false);
-        this.showForm.set(false);
-        this.loadPacientes();
-      });
-    }
+        alert(err.error?.message || 'Error al guardar paciente');
+      },
+    });
   }
 
   delete(id: number): void {

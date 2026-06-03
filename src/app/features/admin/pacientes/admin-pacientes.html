@@ -40,7 +40,7 @@
             </div>
             <div class="col-md-4">
               <label class="form-label">Fecha de Nacimiento</label>
-              <input type="date" class="form-control" [(ngModel)]="form.Fecha_Nacimiento" name="fechaNac" required />
+              <input type="date" class="form-control" [(ngModel)]="form.Fecha_Nacimiento" name="fechaNac" [max]="today" required />
             </div>
           </div>
           <div class="mt-3 d-flex gap-2">

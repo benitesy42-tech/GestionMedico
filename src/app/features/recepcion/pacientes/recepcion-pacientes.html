@@ -12,6 +12,7 @@
   @if (showForm()) {
     <div class="card border-0 shadow-sm mb-4">
       <div class="card-body">
+        <form #formEl="ngForm">
         <div class="row g-3">
           <div class="col-md-4">
             <label class="form-label">DNI</label>
@@ -31,13 +32,14 @@
           </div>
           <div class="col-md-4">
             <label class="form-label">Fecha Nacimiento</label>
-            <input type="date" class="form-control" [(ngModel)]="form.Fecha_Nacimiento" name="fechaNac" />
+            <input type="date" class="form-control" [(ngModel)]="form.Fecha_Nacimiento" name="fechaNac" [max]="today" required />
           </div>
         </div>
         <div class="mt-3 d-flex gap-2">
-          <button class="btn btn-primary" (click)="save()" [disabled]="loading()">Guardar</button>
+          <button class="btn btn-primary" (click)="save()" [disabled]="loading() || formEl.invalid">Guardar</button>
           <button class="btn btn-secondary" (click)="cancelForm()">Cancelar</button>
         </div>
+        </form>
       </div>
     </div>
   }

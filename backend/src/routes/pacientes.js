@@ -53,6 +53,10 @@ router.post('/', authenticateToken, async(req, res) => {
     try {
         const { DNI, Nombres, Apellidos, Telefono, Fecha_Nacimiento } = req.body;
 
+        if (new Date(Fecha_Nacimiento) > new Date()) {
+            return res.status(400).json({ message: 'La fecha de nacimiento no puede ser posterior a la fecha actual' });
+        }
+
         await client.query('BEGIN');
 
         const hashedPassword = await bcrypt.hash(DNI, 10);
@@ -83,6 +87,10 @@ router.put('/:id', authenticateToken, async(req, res) => {
     try {
         const { id } = req.params;
         const { DNI, Nombres, Apellidos, Telefono, Fecha_Nacimiento } = req.body;
+
+        if (new Date(Fecha_Nacimiento) > new Date()) {
+            return res.status(400).json({ message: 'La fecha de nacimiento no puede ser posterior a la fecha actual' });
+        }
 
         const result = await pool.query(
             `UPDATE Paciente SET DNI = $1, Nombres = $2, Apellidos = $3, Telefono = $4, Fecha_Nacimiento = $5
