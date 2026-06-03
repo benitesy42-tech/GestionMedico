@@ -117,7 +117,7 @@ router.post('/', authenticateToken, async(req, res) => {
         let intentos = 10;
         while (intentos-- > 0) {
             const conflicto = await pool.query(
-                `SELECT * FROM Cita WHERE ID_Medico = $1 AND Fecha_Hora = $2 AND Estado NOT IN ('Cancelada')`, [ID_Medico, Fecha_Hora],
+                `SELECT * FROM Cita WHERE ID_Medico = $1 AND Fecha_Hora >= $2 AND Fecha_Hora < ($2::timestamp + INTERVAL '30 minutes') AND Estado NOT IN ('Cancelada')`, [ID_Medico, Fecha_Hora],
             );
             if (conflicto.rows.length === 0) break;
 

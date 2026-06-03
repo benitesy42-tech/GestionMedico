@@ -1,5 +1,8 @@
-const { Pool } = require('pg');
+const { Pool, types } = require('pg');
 require('dotenv').config();
+
+types.setTypeParser(1114, v => v.replace(' ', 'T'));
+types.setTypeParser(1184, v => v.replace(' ', 'T'));
 
 const pool = new Pool(
     process.env.DATABASE_URL
