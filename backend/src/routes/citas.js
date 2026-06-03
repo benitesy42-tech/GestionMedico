@@ -113,10 +113,6 @@ router.post('/', authenticateToken, async(req, res) => {
     try {
         let { ID_Paciente, ID_Medico, Fecha_Hora } = req.body;
 
-        if (new Date(Fecha_Hora) < new Date()) {
-            return res.status(400).json({ message: 'No se pueden agendar citas en el pasado' });
-        }
-
         let ajustado = false;
         let intentos = 10;
         while (intentos-- > 0) {
@@ -125,14 +121,10 @@ router.post('/', authenticateToken, async(req, res) => {
             );
             if (conflicto.rows.length === 0) break;
 
-            const fecha = new Date(Fecha_Hora);
-            fecha.setMinutes(fecha.getMinutes() + 30);
-            const año = fecha.getFullYear();
-            const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-            const dia = String(fecha.getDate()).padStart(2, '0');
-            const hora = String(fecha.getHours()).padStart(2, '0');
-            const min = String(fecha.getMinutes()).padStart(2, '0');
-            Fecha_Hora = `${año}-${mes}-${dia}T${hora}:${min}`;
+            const masTarde = await pool.query(
+                `SELECT to_char(($1::timestamp + INTERVAL '30 minutes')::timestamp, 'YYYY-MM-DD"T"HH24:MI') as nueva`, [Fecha_Hora],
+            );
+            Fecha_Hora = masTarde.rows[0].nueva;
             ajustado = true;
         }
 
