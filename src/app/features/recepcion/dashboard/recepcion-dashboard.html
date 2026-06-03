@@ -7,14 +7,14 @@
   @if (loading()) {
     <div class="text-center py-5">
       <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
-      <p class="text-muted mt-2">Cargando citas del día...</p>
+      <p class="text-muted mt-2">Cargando citas...</p>
     </div>
   } @else {
     <div class="row g-3 mb-4 stagger-children">
       <div class="col-6 col-md-3">
         <div class="card border-0 h-100 dashboard-card" style="background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);">
           <div class="card-body">
-            <p class="text-white text-opacity-75 small mb-1">Citas Hoy</p>
+            <p class="text-white text-opacity-75 small mb-1">Citas</p>
             <h3 class="fw-bold text-white mb-0 counter">{{ stats().citasHoy }}</h3>
           </div>
         </div>
@@ -38,7 +38,7 @@
       <div class="col-6 col-md-3">
         <div class="card border-0 h-100 dashboard-card" style="background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);">
           <div class="card-body">
-            <p class="text-white text-opacity-75 small mb-1">Ingresos Hoy</p>
+            <p class="text-white text-opacity-75 small mb-1">Ingresos</p>
             <h3 class="fw-bold text-white mb-0 counter">${{ stats().ingresosHoy.toFixed(0) }}</h3>
           </div>
         </div>
@@ -61,15 +61,17 @@
     </div>
 
     <div class="card border-0 shadow-sm">
-      <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
         <h6 class="fw-bold mb-0" style="color: #0c4a6e;">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          Citas del
-          <input type="date" class="form-control form-control-sm d-inline-block ms-1" style="width: 140px;"
+          Citas de {{ tituloFecha() }}
+        </h6>
+        <div class="d-flex align-items-center gap-2">
+          <input type="date" class="form-control form-control-sm" style="width: 140px;"
             [ngModel]="fechaSeleccionada()"
             (ngModelChange)="cambiarFecha($event)" />
-        </h6>
-        <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill">{{ citas().length }} citas</span>
+          <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill">{{ citas().length }} citas</span>
+        </div>
       </div>
       <div class="table-responsive">
         <table class="table table-hover mb-0">
@@ -105,7 +107,7 @@
             } @empty {
               <tr><td colspan="6" class="text-center py-5 text-muted">
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#dee2e6" stroke-width="1.5" class="mb-2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                <p class="mb-0">No hay citas programadas para esta fecha</p>
+                <p class="mb-0">No hay citas programadas para {{ tituloFecha() }}</p>
               </td></tr>
             }
           </tbody>

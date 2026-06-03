@@ -16,7 +16,8 @@ export interface DashboardStats {
 export class DashboardService {
   constructor(private api: ApiService) {}
 
-  getStats(): Observable<DashboardStats> {
-    return this.api.get<DashboardStats>('/dashboard/stats');
+  getStats(fecha?: string): Observable<DashboardStats> {
+    const params = fecha ? `?fecha=${fecha}` : '';
+    return this.api.get<DashboardStats>(`/dashboard/stats${params}`);
   }
 }

@@ -6,19 +6,34 @@ const router = express.Router();
 
 router.get('/stats', authenticateToken, async (req, res) => {
   try {
+    const fecha = req.query.fecha;
+    const tieneFecha = fecha && fecha !== '';
+
     const [medicos, pacientes, especialidades, citasHoy, citasPendientes, citasAtendidas, ingresosHoy] =
       await Promise.all([
         pool.query('SELECT COUNT(*) FROM Medico'),
         pool.query('SELECT COUNT(*) FROM Paciente'),
         pool.query('SELECT COUNT(*) FROM Especialidad'),
-        pool.query("SELECT COUNT(*) FROM Cita WHERE DATE(Fecha_Hora) = CURRENT_DATE"),
-        pool.query("SELECT COUNT(*) FROM Cita WHERE DATE(Fecha_Hora) = CURRENT_DATE AND Estado = 'Pendiente'"),
-        pool.query("SELECT COUNT(*) FROM Cita WHERE DATE(Fecha_Hora) = CURRENT_DATE AND Estado = 'Atendida'"),
-        pool.query(
-          `SELECT COALESCE(SUM(p.Monto), 0) as total FROM Pago p
-           JOIN Consulta_Medica cm ON p.ID_Consulta = cm.ID_Consulta
-           WHERE DATE(p.Fecha_Pago) = CURRENT_DATE AND p.Estado_Pago = 'Completado'`,
-        ),
+        tieneFecha
+          ? pool.query('SELECT COUNT(*) FROM Cita WHERE DATE(Fecha_Hora) = $1', [fecha])
+          : pool.query("SELECT COUNT(*) FROM Cita WHERE DATE(Fecha_Hora) = CURRENT_DATE"),
+        tieneFecha
+          ? pool.query("SELECT COUNT(*) FROM Cita WHERE DATE(Fecha_Hora) = $1 AND Estado = 'Pendiente'", [fecha])
+          : pool.query("SELECT COUNT(*) FROM Cita WHERE DATE(Fecha_Hora) = CURRENT_DATE AND Estado = 'Pendiente'"),
+        tieneFecha
+          ? pool.query("SELECT COUNT(*) FROM Cita WHERE DATE(Fecha_Hora) = $1 AND Estado = 'Atendida'", [fecha])
+          : pool.query("SELECT COUNT(*) FROM Cita WHERE DATE(Fecha_Hora) = CURRENT_DATE AND Estado = 'Atendida'"),
+        tieneFecha
+          ? pool.query(
+              `SELECT COALESCE(SUM(p.Monto), 0) as total FROM Pago p
+               JOIN Consulta_Medica cm ON p.ID_Consulta = cm.ID_Consulta
+               WHERE DATE(p.Fecha_Pago) = $1 AND p.Estado_Pago = 'Completado'`, [fecha],
+            )
+          : pool.query(
+              `SELECT COALESCE(SUM(p.Monto), 0) as total FROM Pago p
+               JOIN Consulta_Medica cm ON p.ID_Consulta = cm.ID_Consulta
+               WHERE DATE(p.Fecha_Pago) = CURRENT_DATE AND p.Estado_Pago = 'Completado'`,
+            ),
       ]);
 
     res.json({
