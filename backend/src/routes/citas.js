@@ -111,18 +111,33 @@ router.get('/paciente/:idPaciente', authenticateToken, async(req, res) => {
 
 router.post('/', authenticateToken, async(req, res) => {
     try {
-        const { ID_Paciente, ID_Medico, Fecha_Hora } = req.body;
+        let { ID_Paciente, ID_Medico, Fecha_Hora } = req.body;
 
-        if (new Date(Fecha_Hora) <= new Date()) {
-            return res.status(400).json({ message: 'No se pueden agendar citas en el pasado o en el momento actual' });
+        if (new Date(Fecha_Hora) < new Date()) {
+            return res.status(400).json({ message: 'No se pueden agendar citas en el pasado' });
         }
 
-        const conflicto = await pool.query(
-            `SELECT * FROM Cita WHERE ID_Medico = $1 AND Fecha_Hora = $2 AND Estado NOT IN ('Cancelada')`, [ID_Medico, Fecha_Hora],
-        );
+        let ajustado = false;
+        let intentos = 10;
+        while (intentos-- > 0) {
+            const conflicto = await pool.query(
+                `SELECT * FROM Cita WHERE ID_Medico = $1 AND Fecha_Hora = $2 AND Estado NOT IN ('Cancelada')`, [ID_Medico, Fecha_Hora],
+            );
+            if (conflicto.rows.length === 0) break;
 
-        if (conflicto.rows.length > 0) {
-            return res.status(409).json({ message: 'El horario ya está ocupado por otra cita' });
+            const fecha = new Date(Fecha_Hora);
+            fecha.setMinutes(fecha.getMinutes() + 30);
+            const año = fecha.getFullYear();
+            const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+            const dia = String(fecha.getDate()).padStart(2, '0');
+            const hora = String(fecha.getHours()).padStart(2, '0');
+            const min = String(fecha.getMinutes()).padStart(2, '0');
+            Fecha_Hora = `${año}-${mes}-${dia}T${hora}:${min}`;
+            ajustado = true;
+        }
+
+        if (intentos < 0) {
+            return res.status(409).json({ message: 'Horario muy congestionado, intente con otro día' });
         }
 
         const result = await pool.query(
@@ -130,7 +145,10 @@ router.post('/', authenticateToken, async(req, res) => {
        VALUES ($1, $2, $3, 'Pendiente') RETURNING *`, [ID_Paciente, ID_Medico, Fecha_Hora],
         );
 
-        res.status(201).json(normalizeRow(result.rows[0]));
+        res.status(201).json({
+            ...normalizeRow(result.rows[0]),
+            Ajustado: ajustado,
+        });
     } catch (error) {
         console.error('Error al crear cita:', error);
         res.status(500).json({ message: 'Error al crear cita. Verifique que el horario esté disponible.' });

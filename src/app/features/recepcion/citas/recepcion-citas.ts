@@ -36,7 +36,8 @@ export default class RecepcionCitasComponent {
   minDateTime = '';
 
   constructor() {
-    this.minDateTime = new Date().toISOString().slice(0, 16);
+    const ahora = new Date(Date.now() - new Date().getTimezoneOffset() * 60000);
+    this.minDateTime = ahora.toISOString().slice(0, 16);
     this.loadCitas();
     this.medicosSvc.getAll().subscribe((data) => this.medicos.set(data));
     this.pacientesSvc.getAll().subscribe((data) => this.pacientes.set(data));
@@ -75,7 +76,7 @@ export default class RecepcionCitasComponent {
   errorMsg = signal('');
 
   save(): void {
-    if (new Date(this.form.Fecha_Hora) <= new Date()) {
+    if (new Date(this.form.Fecha_Hora) < new Date()) {
       this.errorMsg.set('No se puede agendar una cita en el pasado');
       return;
     }
