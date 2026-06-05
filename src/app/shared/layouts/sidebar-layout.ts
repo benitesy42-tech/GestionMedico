@@ -1,6 +1,9 @@
-import { Component, inject, signal, HostListener } from '@angular/core';
+import { Component, inject, signal, HostListener, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { ChatService } from '../../features/chat/chat.service';
+import { ListaConversaciones } from '../../features/chat/lista-conversaciones';
+import { VentanaChat } from '../../features/chat/ventana-chat';
 
 export interface NavItem {
   label: string;
@@ -10,11 +13,12 @@ export interface NavItem {
 
 @Component({
   selector: 'app-sidebar-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, ListaConversaciones, VentanaChat],
   templateUrl: './sidebar-layout.html',
 })
-export class SidebarLayout {
+export class SidebarLayout implements OnInit, OnDestroy {
   protected auth = inject(AuthService);
+  protected chat = inject(ChatService);
   private route = inject(ActivatedRoute);
 
   sidebarOpen = signal(false);
@@ -31,6 +35,17 @@ export class SidebarLayout {
     return this.route.snapshot.data['roleName'] || '';
   }
 
+  ngOnInit() {
+    const token = localStorage.getItem('token');
+    if (token && this.auth.isAuthenticated()) {
+      this.chat.conectar(token);
+    }
+  }
+
+  ngOnDestroy() {
+    this.chat.desconectar();
+  }
+
   toggleSidebar(): void {
     this.sidebarOpen.update((v) => !v);
   }
@@ -40,6 +55,7 @@ export class SidebarLayout {
   }
 
   logout(): void {
+    this.chat.desconectar();
     this.auth.logout();
   }
 

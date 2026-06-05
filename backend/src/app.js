@@ -12,6 +12,7 @@ const consultasRoutes = require('./routes/consultas');
 const pagosRoutes = require('./routes/pagos');
 const dashboardRoutes = require('./routes/dashboard');
 const examenesRoutes = require('./routes/examenes');
+const chatRoutes = require('./routes/chat');
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use('/api/consultas', consultasRoutes);
 app.use('/api/pagos', pagosRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/examenes', examenesRoutes);
+app.use('/api/chat', chatRoutes);
 
 app.use((err, req, res, next) => {
   console.error('Error no controlado:', err);

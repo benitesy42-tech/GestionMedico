@@ -46,6 +46,20 @@
           <span>{{ item.label }}</span>
         </a>
       }
+
+      <button
+        class="d-flex align-items-center gap-3 px-4 py-3 text-white text-decoration-none nav-link-custom w-100 border-0"
+        style="background: none; font-size: 0.875rem;"
+        (click)="chat.togglePanel(); closeSidebar();"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span>Chat</span>
+        @if (chat.noLeidos() > 0) {
+          <span class="badge rounded-pill ms-auto" style="background:#ef4444;font-size:0.65rem;">{{ chat.noLeidos() }}</span>
+        }
+      </button>
     </div>
 
     <div class="p-3 border-top border-white border-opacity-10">
@@ -75,7 +89,7 @@
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
-      <div class="d-flex align-items-center gap-2">
+      <div class="d-flex align-items-center gap-2 flex-grow-1">
         <div class="bg-white rounded-2 d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm" style="width: 32px; height: 32px;">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0c4a6e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
@@ -86,9 +100,34 @@
           <div class="text-muted" style="font-size: 0.7rem;">{{ roleName }}</div>
         </div>
       </div>
+      <button
+        class="btn p-1 border-0 position-relative"
+        (click)="chat.togglePanel()"
+        style="background: none; font-size: 1.2rem; color: #0c4a6e;"
+        aria-label="Chat"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        @if (chat.noLeidos() > 0) {
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill" style="background:#ef4444;font-size:0.55rem;">{{ chat.noLeidos() }}</span>
+        }
+      </button>
     </div>
-    <div class="p-3 p-md-4 flex-grow-1">
+    <div class="p-3 p-md-4 flex-grow-1 position-relative">
       <router-outlet />
+
+      <!-- Chat Panel -->
+      @if (chat.panelAbierto()) {
+        <div class="chat-panel-backdrop" (click)="chat.togglePanel()"></div>
+        <div class="chat-panel animate-slide-in-right">
+          @if (chat.conversacionActiva() && chat.mensajes().length >= 0) {
+            <app-ventana-chat />
+          } @else {
+            <app-lista-conversaciones />
+          }
+        </div>
+      }
     </div>
   </main>
 </div>

@@ -2,6 +2,7 @@ const express = require('express');
 const pool = require('../db');
 const { authenticateToken } = require('../middleware/auth');
 const { normalizeRow, normalizeRows } = require('../utils/normalize-rows');
+const { emitirNotificacionSistema } = require('../utils/chat-notify');
 
 const router = express.Router();
 
@@ -137,8 +138,41 @@ router.post('/', authenticateToken, async(req, res) => {
        VALUES ($1, $2, $3, 'Pendiente') RETURNING *`, [ID_Paciente, ID_Medico, Fecha_Hora],
         );
 
+        const citaCreada = result.rows[0];
+
+        const io = req.app.get('io');
+        if (io) {
+            (async () => {
+                try {
+                    const paci = await pool.query('SELECT Nombres, Apellidos FROM Paciente WHERE ID_Paciente = $1', [ID_Paciente]);
+                    const paciNombre = paci.rows.length > 0 ? `${paci.rows[0].nombres} ${paci.rows[0].apellidos}` : 'Paciente';
+
+                    const medi = await pool.query('SELECT ID_Usuario FROM Medico WHERE ID_Medico = $1', [ID_Medico]);
+                    const medUserId = medi.rows[0]?.id_usuario;
+
+                    const recep = await pool.query(
+                        `SELECT u.ID_Usuario FROM Usuario u JOIN Rol r ON u.ID_Rol = r.ID_Rol WHERE r.Nombre_Rol = 'Recepcionista' LIMIT 1`,
+                    );
+                    const recepUserId = recep.rows[0]?.id_usuario;
+
+                    if (medUserId && recepUserId) {
+                        const fechaFormateada = new Date(Fecha_Hora).toLocaleString('es-MX', {
+                            day: '2-digit', month: '2-digit', year: 'numeric',
+                            hour: '2-digit', minute: '2-digit',
+                        });
+                        await emitirNotificacionSistema(
+                            io, recepUserId, medUserId,
+                            `Nueva cita agendada: ${paciNombre} — ${fechaFormateada}`,
+                        );
+                    }
+                } catch (e) {
+                    console.error('Error en notificación de cita:', e);
+                }
+            })();
+        }
+
         res.status(201).json({
-            ...normalizeRow(result.rows[0]),
+            ...normalizeRow(citaCreada),
             Ajustado: ajustado,
         });
     } catch (error) {
@@ -164,6 +198,40 @@ router.put('/:id', authenticateToken, async(req, res) => {
         if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Cita no encontrada' });
         }
+
+        const io = req.app.get('io');
+        if (io && (Estado === 'Cancelada' || Estado === 'Reprogramada')) {
+            (async () => {
+                try {
+                    const cita = result.rows[0];
+                    const paci = await pool.query('SELECT Nombres, Apellidos FROM Paciente WHERE ID_Paciente = $1', [cita.id_paciente]);
+                    const paciNombre = paci.rows.length > 0 ? `${paci.rows[0].nombres} ${paci.rows[0].apellidos}` : 'Paciente';
+
+                    const medi = await pool.query('SELECT ID_Usuario FROM Medico WHERE ID_Medico = $1', [cita.id_medico]);
+                    const medUserId = medi.rows[0]?.id_usuario;
+
+                    const recep = await pool.query(
+                        `SELECT u.ID_Usuario FROM Usuario u JOIN Rol r ON u.ID_Rol = r.ID_Rol WHERE r.Nombre_Rol = 'Recepcionista' LIMIT 1`,
+                    );
+                    const recepUserId = recep.rows[0]?.id_usuario;
+
+                    if (medUserId && recepUserId) {
+                        const fechaFormateada = new Date(cita.fecha_hora).toLocaleString('es-MX', {
+                            day: '2-digit', month: '2-digit', year: 'numeric',
+                            hour: '2-digit', minute: '2-digit',
+                        });
+                        const accion = Estado === 'Cancelada' ? 'cancelada' : 'reprogramada';
+                        await emitirNotificacionSistema(
+                            io, recepUserId, medUserId,
+                            `Cita ${accion}: ${paciNombre} — ${fechaFormateada}`,
+                        );
+                    }
+                } catch (e) {
+                    console.error('Error en notificación de cita:', e);
+                }
+            })();
+        }
+
         res.json(normalizeRow(result.rows[0]));
     } catch (error) {
         console.error('Error al actualizar cita:', error);
@@ -180,6 +248,31 @@ router.delete('/:id', authenticateToken, async(req, res) => {
         if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Cita no encontrada' });
         }
+
+        const io = req.app.get('io');
+        if (io) {
+            (async () => {
+                try {
+                    const cita = result.rows[0];
+                    const paci = await pool.query('SELECT Nombres, Apellidos FROM Paciente WHERE ID_Paciente = $1', [cita.id_paciente]);
+                    const paciNombre = paci.rows.length > 0 ? `${paci.rows[0].nombres} ${paci.rows[0].apellidos}` : 'Paciente';
+                    const medi = await pool.query('SELECT ID_Usuario FROM Medico WHERE ID_Medico = $1', [cita.id_medico]);
+                    const medUserId = medi.rows[0]?.id_usuario;
+                    const recep = await pool.query(
+                        `SELECT u.ID_Usuario FROM Usuario u JOIN Rol r ON u.ID_Rol = r.ID_Rol WHERE r.Nombre_Rol = 'Recepcionista' LIMIT 1`,
+                    );
+                    const recepUserId = recep.rows[0]?.id_usuario;
+                    if (medUserId && recepUserId) {
+                        const fechaFormateada = new Date(cita.fecha_hora).toLocaleString('es-MX', {
+                            day: '2-digit', month: '2-digit', year: 'numeric',
+                            hour: '2-digit', minute: '2-digit',
+                        });
+                        await emitirNotificacionSistema(io, recepUserId, medUserId, `Cita cancelada: ${paciNombre} — ${fechaFormateada}`);
+                    }
+                } catch (e) { console.error('Error en notificación:', e); }
+            })();
+        }
+
         res.json({ message: 'Cita cancelada exitosamente' });
     } catch (error) {
         console.error('Error al cancelar cita:', error);

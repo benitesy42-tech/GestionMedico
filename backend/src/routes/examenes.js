@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 const { createWorker } = require('tesseract.js');
 const pool = require('../db');
 const { authenticateToken, requireRole } = require('../middleware/auth');
+const { emitirNotificacionSistema } = require('../utils/chat-notify');
 
 const UPLOADS_DIR = path.join(__dirname, '..', '..', 'uploads');
 
@@ -285,6 +286,52 @@ router.post('/upload', authenticateToken, upload.single('archivo'), async (req, 
         );
         const examen = result.rows[0];
         res.status(201).json({ message: 'Examen subido', examen: normalizeExamen(examen) });
+
+        const io = req.app.get('io');
+        if (io) {
+            (async () => {
+                try {
+                    let medUserId = null;
+                    const paci = await pool.query('SELECT Nombres, Apellidos FROM Paciente WHERE ID_Paciente = $1', [ID_Paciente]);
+                    const paciNombre = paci.rows.length > 0 ? `${paci.rows[0].nombres} ${paci.rows[0].apellidos}` : 'Paciente';
+
+                    if (ID_Consulta) {
+                        const cons = await pool.query(
+                            `SELECT cm.ID_Cita FROM Consulta_Medica cm WHERE cm.ID_Consulta = $1`, [ID_Consulta],
+                        );
+                        if (cons.rows.length > 0) {
+                            const cita = await pool.query('SELECT ID_Medico FROM Cita WHERE ID_Cita = $1', [cons.rows[0].id_cita]);
+                            if (cita.rows.length > 0) {
+                                const medi = await pool.query('SELECT ID_Usuario FROM Medico WHERE ID_Medico = $1', [cita.rows[0].id_medico]);
+                                medUserId = medi.rows[0]?.id_usuario;
+                            }
+                        }
+                    }
+
+                    if (!medUserId) {
+                        const medi = await pool.query(
+                            `SELECT m.ID_Usuario FROM Medico m
+                             JOIN Cita c ON c.ID_Medico = m.ID_Medico
+                             WHERE c.ID_Paciente = $1 AND c.Estado NOT IN ('Cancelada')
+                             ORDER BY c.Fecha_Hora DESC LIMIT 1`, [ID_Paciente],
+                        );
+                        medUserId = medi.rows[0]?.id_usuario;
+                    }
+
+                    const recep = await pool.query(
+                        `SELECT u.ID_Usuario FROM Usuario u JOIN Rol r ON u.ID_Rol = r.ID_Rol WHERE r.Nombre_Rol = 'Recepcionista' LIMIT 1`,
+                    );
+                    const recepUserId = recep.rows[0]?.id_usuario;
+
+                    if (medUserId && recepUserId) {
+                        await emitirNotificacionSistema(
+                            io, recepUserId, medUserId,
+                            `Nuevo examen de laboratorio disponible: ${paciNombre} — ${req.file.originalname}`,
+                        );
+                    }
+                } catch (e) { console.error('Error en notificación de examen:', e); }
+            })();
+        }
         (async () => {
             try {
                 const ocrResult = await ejecutarOCR(req.file.path);

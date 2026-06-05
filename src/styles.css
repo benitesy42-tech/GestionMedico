@@ -533,3 +533,52 @@ body {
 .nav-tabs .nav-link:hover:not(.active) {
   border-bottom-color: #dee2e6;
 }
+
+/* ─── Chat Panel ─── */
+
+.chat-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  z-index: 1045;
+}
+
+.chat-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 380px;
+  background: #fff;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+  z-index: 1050;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+@media (max-width: 575.98px) {
+  .chat-panel {
+    width: 100%;
+  }
+}
+
+/* ─── Chat Scroll ─── */
+
+.chat-mensajes::-webkit-scrollbar {
+  width: 4px;
+}
+
+.chat-mensajes::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+.chat-lista::-webkit-scrollbar {
+  width: 4px;
+}
+
+.chat-lista::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
