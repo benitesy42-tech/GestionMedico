@@ -3,6 +3,20 @@
   "installCommand": "npm install",
   "outputDirectory": "dist/ProyectoGestionMedico/browser",
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "experimentalServices": {
+    "frontend": {
+      "routePrefix": "/",
+      "framework": "angular"
+    },
+    "backend": {
+      "root": "backend",
+      "entrypoint": "src/index.js",
+      "routePrefix": "/_/backend"
+    }
+  }
 }

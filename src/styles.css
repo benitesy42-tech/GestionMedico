@@ -501,3 +501,35 @@ body {
     margin: 1.5cm;
   }
 }
+
+.drop-zone {
+  border: 2px dashed #cbd5e1;
+  background: #f8fafc;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.drop-zone:hover, .drop-zone.drag-over {
+  border-color: #0c4a6e;
+  background: #f0f7ff;
+}
+
+.examen-card {
+  transition: all 0.15s ease;
+}
+.examen-card:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+}
+
+.nav-tabs .nav-link {
+  border: none;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+.nav-tabs .nav-link.active {
+  border-bottom-color: #0c4a6e;
+  color: #0c4a6e !important;
+}
+.nav-tabs .nav-link:hover:not(.active) {
+  border-bottom-color: #dee2e6;
+}

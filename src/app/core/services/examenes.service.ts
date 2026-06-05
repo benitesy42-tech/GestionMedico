@@ -1,0 +1,48 @@
+import { Injectable, inject } from '@angular/core';
+import { ApiService } from './api.service';
+import { Observable } from 'rxjs';
+import { Examen, RangoReferencia } from '../models/examen';
+
+@Injectable({ providedIn: 'root' })
+export class ExamenesService {
+  private api = inject(ApiService);
+
+  getByPaciente(idPaciente: number, params?: {
+    tipo?: string; laboratorio?: string; estado?: string;
+    desde?: string; hasta?: string; q?: string;
+  }): Observable<Examen[]> {
+    return this.api.get<Examen[]>(`/examenes/paciente/${idPaciente}`, params);
+  }
+
+  getById(id: number): Observable<Examen> {
+    return this.api.get<Examen>(`/examenes/${id}`);
+  }
+
+  upload(formData: FormData): Observable<{ message: string; examen: Examen }> {
+    return this.api.post<{ message: string; examen: Examen }>('/examenes/upload', formData);
+  }
+
+  delete(id: number): Observable<{ message: string }> {
+    return this.api.delete<{ message: string }>(`/examenes/${id}`);
+  }
+
+  generarResumen(id: number): Observable<{ message: string }> {
+    return this.api.post<{ message: string }>(`/examenes/${id}/generar-resumen`, {});
+  }
+
+  actualizarValores(id: number, valores: any[]): Observable<{ message: string; estadoAlerta: string }> {
+    return this.api.put<{ message: string; estadoAlerta: string }>(`/examenes/${id}/valores`, { valores });
+  }
+
+  getArchivoUrl(id: number): string {
+    return `${this.api['baseUrl']}/examenes/${id}/archivo`;
+  }
+
+  getRangos(): Observable<RangoReferencia[]> {
+    return this.api.get<RangoReferencia[]>('/examenes/rangos');
+  }
+
+  actualizarRango(id: number, data: Partial<RangoReferencia>): Observable<{ message: string }> {
+    return this.api.put<{ message: string }>(`/examenes/rangos/${id}`, data);
+  }
+}

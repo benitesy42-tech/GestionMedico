@@ -87,211 +87,314 @@
       </div>
     </div>
 
-    <div class="card border-0 shadow-sm mb-4 no-print">
-      <div class="card-body">
-        <div class="d-flex align-items-center justify-content-between mb-3">
-          <h6 class="fw-bold mb-0 section-title">Filtros</h6>
-          <button class="btn btn-sm btn-outline-secondary rounded-pill" (click)="showFiltros.set(!showFiltros())">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-            {{ showFiltros() ? 'Ocultar Filtros' : 'Mostrar Filtros' }}
-          </button>
+    <ul class="nav nav-tabs mb-4 no-print" style="border-bottom-color: #dee2e6;">
+      <li class="nav-item">
+        <button class="nav-link" [class.active]="activeTab() === 'atenciones'" (click)="activeTab.set('atenciones')" style="color: #0c4a6e; font-weight: 600;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Atenciones
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" [class.active]="activeTab() === 'examenes'" (click)="activeTab.set('examenes')" style="color: #0c4a6e; font-weight: 600;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Exámenes
+          @if (examenes().length > 0) {
+            <span class="badge bg-primary ms-1 rounded-pill">{{ examenes().length }}</span>
+          }
+        </button>
+      </li>
+    </ul>
+
+    @if (activeTab() === 'atenciones') {
+      <div class="card border-0 shadow-sm mb-4 no-print">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <h6 class="fw-bold mb-0 section-title">Filtros</h6>
+            <button class="btn btn-sm btn-outline-secondary rounded-pill" (click)="showFiltros.set(!showFiltros())">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+              {{ showFiltros() ? 'Ocultar Filtros' : 'Mostrar Filtros' }}
+            </button>
+          </div>
+          @if (showFiltros()) {
+            <div class="row g-3 align-items-end">
+              <div class="col-6 col-md-3">
+                <label class="form-label small fw-semibold">Desde</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="filtroDesde" [max]="today" />
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label small fw-semibold">Hasta</label>
+                <input type="date" class="form-control form-control-sm" [(ngModel)]="filtroHasta" [max]="today" />
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label small fw-semibold">Buscar en atenciones</label>
+                <input class="form-control form-control-sm" [(ngModel)]="filtroTexto" placeholder="Filtrar por diagnóstico, médico, tratamiento..." />
+              </div>
+              <div class="col-12 col-md-2 d-flex gap-2">
+                <button class="btn btn-primary btn-sm rounded-pill px-3 flex-grow-1" (click)="aplicarFiltros()">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                  Aplicar
+                </button>
+                <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" (click)="limpiarFiltros()">Limpiar</button>
+              </div>
+            </div>
+          }
         </div>
-        @if (showFiltros()) {
-          <div class="row g-3 align-items-end">
-            <div class="col-6 col-md-3">
-              <label class="form-label small fw-semibold">Desde</label>
-              <input type="date" class="form-control form-control-sm" [(ngModel)]="filtroDesde" [max]="today" />
-            </div>
-            <div class="col-6 col-md-3">
-              <label class="form-label small fw-semibold">Hasta</label>
-              <input type="date" class="form-control form-control-sm" [(ngModel)]="filtroHasta" [max]="today" />
-            </div>
-            <div class="col-12 col-md-4">
-              <label class="form-label small fw-semibold">Buscar en atenciones</label>
-              <input class="form-control form-control-sm" [(ngModel)]="filtroTexto" placeholder="Filtrar por diagnóstico, médico, tratamiento..." />
-            </div>
-            <div class="col-12 col-md-2 d-flex gap-2">
-              <button class="btn btn-primary btn-sm rounded-pill px-3 flex-grow-1" (click)="aplicarFiltros()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-                Aplicar
-              </button>
-              <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" (click)="limpiarFiltros()">Limpiar</button>
+      </div>
+
+      @if (loading()) {
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+          <p class="text-muted mt-2">Cargando historial clínico...</p>
+        </div>
+      } @else {
+        @if (historialFiltrado().length === 0) {
+          <div class="card border-0 shadow-sm">
+            <div class="card-body text-center py-5">
+              <div class="d-inline-flex align-items-center justify-content-center rounded-3 mb-3" style="width: 72px; height: 72px; background: #e9ecef;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#adb5bd" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              </div>
+              <h6 class="fw-semibold text-muted">No se encontraron atenciones</h6>
+              <p class="text-muted small mb-0">Este paciente no tiene consultas registradas en el sistema</p>
             </div>
           </div>
         }
-      </div>
-    </div>
+        @for (consulta of historialFiltrado(); track consulta.ID_Consulta) {
+          <div class="card border-0 shadow-sm mb-4 historial-card">
+            <div class="card-header bg-white px-4 py-3 d-flex flex-wrap align-items-center justify-content-between gap-2 border-bottom">
+              <div class="d-flex align-items-center gap-2">
+                <div class="rounded-circle d-flex align-items-center justify-content-center bg-primary bg-opacity-10" style="width: 36px; height: 36px;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d6efd" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                </div>
+                <div>
+                  <strong style="font-size: 0.9rem;">{{ consulta.Fecha_Hora || consulta.Fecha_Registro | date:'dd/MM/yyyy HH:mm' }}</strong>
+                  <div class="small text-muted">{{ consulta.Especialidad }}</div>
+                </div>
+              </div>
+              <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3 py-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                {{ consulta.Medico_Nombre }}
+              </span>
+            </div>
+            <div class="card-body px-4 py-3">
+              <div class="row g-4">
+                <div class="col-12">
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0c4a6e" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    <span class="fw-semibold small text-uppercase" style="color: #0c4a6e; letter-spacing: 0.05em;">Motivo de Consulta</span>
+                  </div>
+                  <p class="mb-0" style="padding-left: 24px;">{{ consulta.Motivo }}</p>
+                </div>
+                @if (consulta.Sintomas) {
+                  <div class="col-12 col-md-6">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc3545" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                      <span class="fw-semibold small text-uppercase text-danger-emphasis">Síntomas</span>
+                    </div>
+                    <p class="mb-0" style="padding-left: 24px;">{{ consulta.Sintomas }}</p>
+                  </div>
+                }
+                @if (consulta.Diagnostico_Notas) {
+                  <div class="col-12 col-md-6">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#198754" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+                      <span class="fw-semibold small text-uppercase text-success-emphasis">Diagnóstico</span>
+                    </div>
+                    <p class="mb-0" style="padding-left: 24px;">{{ consulta.Diagnostico_Notas }}</p>
+                  </div>
+                }
+                @if (consulta.Signos_Vitales && consulta.Signos_Vitales.length > 0) {
+                  <div class="col-12">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0d6efd" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                      <span class="fw-semibold small text-uppercase" style="color: #0c4a6e; letter-spacing: 0.05em;">Signos Vitales</span>
+                    </div>
+                    <div class="row g-2" style="padding-left: 24px;">
+                      @for (sv of consulta.Signos_Vitales; track $index) {
+                        <div class="col-6 col-md-3 col-lg-2">
+                          <div class="p-2 rounded-3 text-center" style="background: #f0f4ff;">
+                            <div class="small text-muted">P. Arterial</div>
+                            <div class="fw-bold">{{ sv.Presion_Arterial || '-' }}</div>
+                          </div>
+                        </div>
+                        <div class="col-6 col-md-3 col-lg-2">
+                          <div class="p-2 rounded-3 text-center" style="background: #f0f4ff;">
+                            <div class="small text-muted">F.C. (lpm)</div>
+                            <div class="fw-bold">{{ sv.Frecuencia_Cardiaca ?? '-' }}</div>
+                          </div>
+                        </div>
+                        <div class="col-6 col-md-3 col-lg-2">
+                          <div class="p-2 rounded-3 text-center" style="background: #f0f4ff;">
+                            <div class="small text-muted">Temp (°C)</div>
+                            <div class="fw-bold">{{ sv.Temperatura ?? '-' }}</div>
+                          </div>
+                        </div>
+                        <div class="col-6 col-md-3 col-lg-2">
+                          <div class="p-2 rounded-3 text-center" style="background: #f0f4ff;">
+                            <div class="small text-muted">Peso (kg)</div>
+                            <div class="fw-bold">{{ sv.Peso ?? '-' }}</div>
+                          </div>
+                        </div>
+                        <div class="col-6 col-md-3 col-lg-2">
+                          <div class="p-2 rounded-3 text-center" style="background: #f0f4ff;">
+                            <div class="small text-muted">Estatura (cm)</div>
+                            <div class="fw-bold">{{ sv.Estatura ?? '-' }}</div>
+                          </div>
+                        </div>
+                        <div class="col-6 col-md-3 col-lg-2">
+                          <div class="p-2 rounded-3 text-center" style="background: #f0f4ff;">
+                            <div class="small text-muted">F.R. (rpm)</div>
+                            <div class="fw-bold">{{ sv.Frecuencia_Respiratoria ?? '-' }}</div>
+                          </div>
+                        </div>
+                        <div class="col-6 col-md-3 col-lg-2">
+                          <div class="p-2 rounded-3 text-center" style="background: #f0f4ff;">
+                            <div class="small text-muted">SpO₂ (%)</div>
+                            <div class="fw-bold">{{ sv.Saturacion_Oxigeno ?? '-' }}</div>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+                @if (consulta.Tratamiento) {
+                  <div class="col-12 col-md-6">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6f42c1" stroke-width="2"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6h0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.3.3 0 1 0 .2.3"/></svg>
+                      <span class="fw-semibold small text-uppercase" style="color: #6f42c1;">Tratamiento</span>
+                    </div>
+                    <p class="mb-0" style="padding-left: 24px;">{{ consulta.Tratamiento }}</p>
+                  </div>
+                }
+                @if (consulta.Observaciones) {
+                  <div class="col-12 col-md-6">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fd7e14" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                      <span class="fw-semibold small text-uppercase" style="color: #fd7e14;">Observaciones</span>
+                    </div>
+                    <p class="mb-0" style="padding-left: 24px;">{{ consulta.Observaciones }}</p>
+                  </div>
+                }
+                @if (consulta.Recetas && consulta.Recetas.length > 0) {
+                  <div class="col-12">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#198754" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                      <span class="fw-semibold small text-uppercase" style="color: #198754;">Medicamentos Recetados</span>
+                    </div>
+                    <div class="table-responsive" style="padding-left: 24px;">
+                      <table class="table table-sm table-bordered mb-0" style="background: #f8f9fa;">
+                        <thead>
+                          <tr>
+                            <th style="font-size: 0.7rem;">Medicamento</th>
+                            <th style="font-size: 0.7rem;">Dosis</th>
+                            <th style="font-size: 0.7rem;">Frecuencia</th>
+                            <th style="font-size: 0.7rem;">Duración</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (rec of consulta.Recetas; track rec.ID_Receta) {
+                            <tr>
+                              <td class="fw-semibold">{{ rec.Medicamento }}</td>
+                              <td>{{ rec.Dosis }}</td>
+                              <td>{{ rec.Frecuencia }}</td>
+                              <td>{{ rec.Duracion || '-' }}</td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      }
+    }
 
-    @if (loading()) {
-      <div class="text-center py-5">
-        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
-        <p class="text-muted mt-2">Cargando historial clínico...</p>
+    @if (activeTab() === 'examenes') {
+      <div class="card border-0 shadow-sm mb-4 no-print">
+        <div class="card-body">
+          <h6 class="fw-bold mb-3 section-title">Filtrar Exámenes</h6>
+          <div class="row g-3 align-items-end">
+            <div class="col-6 col-md-3">
+              <label class="form-label small fw-semibold">Tipo</label>
+              <select class="form-select form-select-sm" [(ngModel)]="filtroExamenTipo">
+                <option value="">Todos</option>
+                @for (t of tiposExamen; track t) {
+                  <option [value]="t">{{ t }}</option>
+                }
+              </select>
+            </div>
+            <div class="col-6 col-md-3">
+              <label class="form-label small fw-semibold">Estado</label>
+              <select class="form-select form-select-sm" [(ngModel)]="filtroExamenEstado">
+                <option value="">Todos</option>
+                @for (e of estadosAlerta; track e) {
+                  <option [value]="e">{{ e }}</option>
+                }
+              </select>
+            </div>
+            <div class="col-6 col-md-3">
+              <label class="form-label small fw-semibold">Laboratorio</label>
+              <input class="form-control form-control-sm" [(ngModel)]="filtroExamenLab" placeholder="Nombre del laboratorio" />
+            </div>
+            <div class="col-12 col-md-3">
+              <label class="form-label small fw-semibold">Buscar en contenido</label>
+              <input class="form-control form-control-sm" [(ngModel)]="filtroExamenQ" placeholder="Texto en OCR o nombre..." />
+            </div>
+          </div>
+        </div>
       </div>
-    } @else {
-      @if (historialFiltrado().length === 0) {
+
+      @if (examenesLoading()) {
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+          <p class="text-muted mt-2">Cargando exámenes...</p>
+        </div>
+      } @else if (examenesFiltrados().length === 0) {
         <div class="card border-0 shadow-sm">
           <div class="card-body text-center py-5">
             <div class="d-inline-flex align-items-center justify-content-center rounded-3 mb-3" style="width: 72px; height: 72px; background: #e9ecef;">
               <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#adb5bd" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </div>
-            <h6 class="fw-semibold text-muted">No se encontraron atenciones</h6>
-            <p class="text-muted small mb-0">Este paciente no tiene consultas registradas en el sistema</p>
+            <h6 class="fw-semibold text-muted">No se encontraron exámenes</h6>
+            <p class="text-muted small mb-0">Este paciente no tiene exámenes de laboratorio registrados</p>
           </div>
         </div>
       }
 
-      @for (consulta of historialFiltrado(); track consulta.ID_Consulta) {
-        <div class="card border-0 shadow-sm mb-4 historial-card">
-          <div class="card-header bg-white px-4 py-3 d-flex flex-wrap align-items-center justify-content-between gap-2 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle d-flex align-items-center justify-content-center bg-primary bg-opacity-10" style="width: 36px; height: 36px;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d6efd" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-              </div>
-              <div>
-                <strong style="font-size: 0.9rem;">{{ consulta.Fecha_Hora || consulta.Fecha_Registro | date:'dd/MM/yyyy HH:mm' }}</strong>
-                <div class="small text-muted">{{ consulta.Especialidad }}</div>
-              </div>
-            </div>
-            <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3 py-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              {{ consulta.Medico_Nombre }}
-            </span>
-          </div>
+      @for (examen of examenesFiltrados(); track examen.ID_Examen) {
+        <div class="card border-0 shadow-sm mb-3 examen-card" (click)="verExamen(examen)" style="cursor:pointer;">
           <div class="card-body px-4 py-3">
-            <div class="row g-4">
-              <div class="col-12">
-                <div class="d-flex align-items-center gap-2 mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0c4a6e" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                  <span class="fw-semibold small text-uppercase" style="color: #0c4a6e; letter-spacing: 0.05em;">Motivo de Consulta</span>
-                </div>
-                <p class="mb-0" style="padding-left: 24px;">{{ consulta.Motivo }}</p>
+            <div class="d-flex flex-wrap align-items-center gap-3">
+              <div class="d-flex align-items-center justify-content-center rounded-2" style="width:48px;height:48px;background:#f0f4ff;">
+                @if (examen.Archivo_Tipo.includes('pdf')) {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#dc3545" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                } @else {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0d6efd" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                }
               </div>
-
-              @if (consulta.Sintomas) {
-                <div class="col-12 col-md-6">
-                  <div class="d-flex align-items-center gap-2 mb-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc3545" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                    <span class="fw-semibold small text-uppercase text-danger-emphasis">Síntomas</span>
-                  </div>
-                  <p class="mb-0" style="padding-left: 24px;">{{ consulta.Sintomas }}</p>
+              <div class="flex-grow-1 min-w-0">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                  <span class="fw-semibold small">{{ examen.Archivo_Nombre }}</span>
+                  <span class="badge rounded-pill px-2 small" [class]="getAlertClass(examen.Estado_Alerta)">{{ examen.Estado_Alerta }}</span>
+                  @if (examen.Es_Sensible) {
+                    <span class="badge bg-danger rounded-pill px-2 small">Sensible</span>
+                  }
+                  @if (examen.Tiene_Valores) {
+                    <span class="badge bg-info rounded-pill px-2 small">Valores</span>
+                  }
                 </div>
-              }
-
-              @if (consulta.Diagnostico_Notas) {
-                <div class="col-12 col-md-6">
-                  <div class="d-flex align-items-center gap-2 mb-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#198754" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
-                    <span class="fw-semibold small text-uppercase text-success-emphasis">Diagnóstico</span>
-                  </div>
-                  <p class="mb-0" style="padding-left: 24px;">{{ consulta.Diagnostico_Notas }}</p>
+                <div class="d-flex flex-wrap gap-2 small text-muted mt-1">
+                  <span>{{ examen.Tipo_Examen }}</span>
+                  @if (examen.Laboratorio) { <span>• {{ examen.Laboratorio }}</span> }
+                  <span>• {{ examen.Fecha_Toma || (examen.Fecha_Subida | date:'yyyy-MM-dd') }}</span>
                 </div>
+              </div>
+              @if (examen.Resumen_Medico) {
+                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2">Con resumen IA</span>
               }
-
-              @if (consulta.Signos_Vitales && consulta.Signos_Vitales.length > 0) {
-                <div class="col-12">
-                  <div class="d-flex align-items-center gap-2 mb-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0d6efd" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                    <span class="fw-semibold small text-uppercase" style="color: #0c4a6e; letter-spacing: 0.05em;">Signos Vitales</span>
-                  </div>
-                  <div class="row g-2" style="padding-left: 24px;">
-                    @for (sv of consulta.Signos_Vitales; track $index) {
-                      <div class="col-6 col-md-3 col-lg-2">
-                        <div class="p-2 rounded-3 text-center" style="background: #f0f4ff;">
-                          <div class="small text-muted">P. Arterial</div>
-                          <div class="fw-bold">{{ sv.Presion_Arterial || '-' }}</div>
-                        </div>
-                      </div>
-                      <div class="col-6 col-md-3 col-lg-2">
-                        <div class="p-2 rounded-3 text-center" style="background: #f0f4ff;">
-                          <div class="small text-muted">F.C. (lpm)</div>
-                          <div class="fw-bold">{{ sv.Frecuencia_Cardiaca ?? '-' }}</div>
-                        </div>
-                      </div>
-                      <div class="col-6 col-md-3 col-lg-2">
-                        <div class="p-2 rounded-3 text-center" style="background: #f0f4ff;">
-                          <div class="small text-muted">Temp (°C)</div>
-                          <div class="fw-bold">{{ sv.Temperatura ?? '-' }}</div>
-                        </div>
-                      </div>
-                      <div class="col-6 col-md-3 col-lg-2">
-                        <div class="p-2 rounded-3 text-center" style="background: #f0f4ff;">
-                          <div class="small text-muted">Peso (kg)</div>
-                          <div class="fw-bold">{{ sv.Peso ?? '-' }}</div>
-                        </div>
-                      </div>
-                      <div class="col-6 col-md-3 col-lg-2">
-                        <div class="p-2 rounded-3 text-center" style="background: #f0f4ff;">
-                          <div class="small text-muted">Estatura (cm)</div>
-                          <div class="fw-bold">{{ sv.Estatura ?? '-' }}</div>
-                        </div>
-                      </div>
-                      <div class="col-6 col-md-3 col-lg-2">
-                        <div class="p-2 rounded-3 text-center" style="background: #f0f4ff;">
-                          <div class="small text-muted">F.R. (rpm)</div>
-                          <div class="fw-bold">{{ sv.Frecuencia_Respiratoria ?? '-' }}</div>
-                        </div>
-                      </div>
-                      <div class="col-6 col-md-3 col-lg-2">
-                        <div class="p-2 rounded-3 text-center" style="background: #f0f4ff;">
-                          <div class="small text-muted">SpO₂ (%)</div>
-                          <div class="fw-bold">{{ sv.Saturacion_Oxigeno ?? '-' }}</div>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                </div>
-              }
-
-              @if (consulta.Tratamiento) {
-                <div class="col-12 col-md-6">
-                  <div class="d-flex align-items-center gap-2 mb-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6f42c1" stroke-width="2"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6h0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.3.3 0 1 0 .2.3"/></svg>
-                    <span class="fw-semibold small text-uppercase" style="color: #6f42c1;">Tratamiento</span>
-                  </div>
-                  <p class="mb-0" style="padding-left: 24px;">{{ consulta.Tratamiento }}</p>
-                </div>
-              }
-
-              @if (consulta.Observaciones) {
-                <div class="col-12 col-md-6">
-                  <div class="d-flex align-items-center gap-2 mb-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fd7e14" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    <span class="fw-semibold small text-uppercase" style="color: #fd7e14;">Observaciones</span>
-                  </div>
-                  <p class="mb-0" style="padding-left: 24px;">{{ consulta.Observaciones }}</p>
-                </div>
-              }
-
-              @if (consulta.Recetas && consulta.Recetas.length > 0) {
-                <div class="col-12">
-                  <div class="d-flex align-items-center gap-2 mb-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#198754" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                    <span class="fw-semibold small text-uppercase" style="color: #198754;">Medicamentos Recetados</span>
-                  </div>
-                  <div class="table-responsive" style="padding-left: 24px;">
-                    <table class="table table-sm table-bordered mb-0" style="background: #f8f9fa;">
-                      <thead>
-                        <tr>
-                          <th style="font-size: 0.7rem;">Medicamento</th>
-                          <th style="font-size: 0.7rem;">Dosis</th>
-                          <th style="font-size: 0.7rem;">Frecuencia</th>
-                          <th style="font-size: 0.7rem;">Duración</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @for (rec of consulta.Recetas; track rec.ID_Receta) {
-                          <tr>
-                            <td class="fw-semibold">{{ rec.Medicamento }}</td>
-                            <td>{{ rec.Dosis }}</td>
-                            <td>{{ rec.Frecuencia }}</td>
-                            <td>{{ rec.Duracion || '-' }}</td>
-                          </tr>
-                        }
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              }
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#adb5bd" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
             </div>
           </div>
         </div>
@@ -299,3 +402,107 @@
     }
   }
 </div>
+
+@if (examenSeleccionado(); as ex) {
+  <div class="modal-backdrop fade show" (click)="cerrarExamen()"></div>
+  <div class="modal fade show d-block" tabindex="-1" style="z-index: 1055;">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header border-0" style="background:#f8f9fa;">
+          <div class="d-flex align-items-center gap-2">
+            @if (ex.Archivo_Tipo.includes('pdf')) {
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc3545" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            } @else {
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0d6efd" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            }
+            <h6 class="fw-bold mb-0">{{ ex.Archivo_Nombre }}</h6>
+          </div>
+          <button type="button" class="btn-close" (click)="cerrarExamen()"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-4">
+            <div class="col-12 col-lg-6">
+              <iframe [src]="getArchivoUrl(ex.ID_Examen)" class="w-100 rounded-3 border" style="height:500px;" *ngIf="ex.Archivo_Tipo.includes('pdf'); else imgPreview"></iframe>
+              <ng-template #imgPreview>
+                <img [src]="getArchivoUrl(ex.ID_Examen)" class="w-100 rounded-3 border" style="max-height:500px;object-fit:contain;" />
+              </ng-template>
+            </div>
+            <div class="col-12 col-lg-6">
+              <div class="d-flex flex-wrap gap-2 mb-3">
+                <span class="badge rounded-pill px-3 py-2" [class]="getAlertClass(ex.Estado_Alerta)">{{ ex.Estado_Alerta }}</span>
+                <span class="badge bg-primary rounded-pill px-3 py-2">{{ ex.Tipo_Examen }}</span>
+                @if (ex.Es_Sensible) {
+                  <span class="badge bg-danger rounded-pill px-3 py-2">Sensible</span>
+                }
+              </div>
+              <div class="mb-3">
+                <small class="text-muted d-block">Laboratorio</small>
+                <span class="fw-semibold">{{ ex.Laboratorio || 'No especificado' }}</span>
+              </div>
+              <div class="mb-3">
+                <small class="text-muted d-block">Fecha de Toma</small>
+                <span class="fw-semibold">{{ ex.Fecha_Toma || 'No registrada' }}</span>
+              </div>
+              @if (ex.Resumen_Medico) {
+                <div class="card bg-light border-0 mb-3">
+                  <div class="card-body p-3">
+                    <small class="text-muted d-block mb-1 fw-semibold">Resumen para el médico</small>
+                    <p class="mb-0 small">{{ ex.Resumen_Medico }}</p>
+                  </div>
+                </div>
+              }
+              @if (ex.Resumen_Paciente) {
+                <div class="card bg-info bg-opacity-10 border-0 mb-3">
+                  <div class="card-body p-3">
+                    <small class="text-muted d-block mb-1 fw-semibold">Resumen para el paciente</small>
+                    <p class="mb-0 small">{{ ex.Resumen_Paciente }}</p>
+                  </div>
+                </div>
+              }
+              @if (ex.Valores && ex.Valores.length > 0) {
+                <h6 class="fw-semibold small mb-2">Valores Extraídos</h6>
+                <div class="table-responsive">
+                  <table class="table table-sm table-bordered small">
+                    <thead>
+                      <tr>
+                        <th>Valor</th>
+                        <th>Resultado</th>
+                        <th>Unidad</th>
+                        <th>Rango Ref.</th>
+                        <th>Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (v of ex.Valores; track v.ID_Valor) {
+                        <tr>
+                          <td class="fw-semibold">{{ v.Nombre_Valor }}</td>
+                          <td>{{ v.Valor_Numerico }}</td>
+                          <td>{{ v.Unidad || '-' }}</td>
+                          <td>{{ v.Rango_Minimo }} – {{ v.Rango_Maximo }}</td>
+                          <td><span class="badge rounded-pill px-2" [class]="getAlertClass(v.Estado)">{{ v.Estado }}</span></td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+              @if (ex.Texto_OCR) {
+                <div>
+                  <small class="text-muted d-block mb-1 fw-semibold">Texto OCR extraído</small>
+                  <pre class="small bg-light p-3 rounded-3 mb-0" style="max-height:200px;overflow-y:auto;white-space:pre-wrap;">{{ ex.Texto_OCR }}</pre>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <a [href]="getArchivoUrl(ex.ID_Examen)" target="_blank" class="btn btn-outline-primary rounded-pill px-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Abrir archivo original
+          </a>
+          <button class="btn btn-secondary rounded-pill px-3" (click)="cerrarExamen()">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

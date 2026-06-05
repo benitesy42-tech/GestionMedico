@@ -6,6 +6,9 @@ import { ConsultasService } from '../../../core/services/consultas.service';
 import { CitasService } from '../../../core/services/citas.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { CitaView } from '../../../core/models/cita';
+import { ExamenesService } from '../../../core/services/examenes.service';
+import { NotificationService } from '../../../core/services/notification.service';
+import { TIPOS_EXAMEN, ETIQUETAS_PREDEFINIDAS } from '../../../core/models/examen';
 
 @Component({
   selector: 'app-medico-consulta',
@@ -19,10 +22,14 @@ export default class MedicoConsultaComponent {
   private route = inject(ActivatedRoute);
   private location = inject(Location);
   private auth = inject(AuthService);
+  private examenesSvc = inject(ExamenesService);
+  private notif = inject(NotificationService);
 
   cita = signal<CitaView | null>(null);
   loading = signal(false);
   idCita = 0;
+  readonly tiposExamen = TIPOS_EXAMEN;
+  readonly etiquetasPredefinidas = ETIQUETAS_PREDEFINIDAS;
 
   form = {
     Motivo: '',
@@ -42,6 +49,21 @@ export default class MedicoConsultaComponent {
     Recetas: [] as { Medicamento: string; Dosis: string; Frecuencia: string; Duracion: string }[],
   };
 
+  examenForm = {
+    archivo: null as File | null,
+    preview: null as string | ArrayBuffer | null,
+    previewType: '' as string,
+    Tipo_Examen: 'Sangre',
+    Etiquetas: [] as string[],
+    customEtiqueta: '',
+    Laboratorio: '',
+    Fecha_Toma: new Date().toISOString().split('T')[0],
+    Notas: '',
+    Es_Sensible: false,
+  };
+  uploadLoading = signal(false);
+  dragOver = signal(false);
+
   constructor() {
     this.idCita = Number(this.route.snapshot.paramMap.get('idCita'));
     const idMedico = this.auth.currentUser()?.idMedico;
@@ -51,6 +73,107 @@ export default class MedicoConsultaComponent {
         this.cita.set(found || null);
       });
     }
+  }
+
+  onDragOver(e: DragEvent) {
+    e.preventDefault();
+    this.dragOver.set(true);
+  }
+
+  onDragLeave(e: DragEvent) {
+    e.preventDefault();
+    this.dragOver.set(false);
+  }
+
+  onDrop(e: DragEvent) {
+    e.preventDefault();
+    this.dragOver.set(false);
+    if (e.dataTransfer?.files.length) {
+      this.handleFile(e.dataTransfer.files[0]);
+    }
+  }
+
+  onFileSelected(e: Event) {
+    const input = e.target as HTMLInputElement;
+    if (input.files?.length) {
+      this.handleFile(input.files[0]);
+    }
+  }
+
+  handleFile(file: File) {
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    if (!['pdf', 'jpg', 'jpeg', 'png'].includes(ext || '')) {
+      this.notif.error('Formato no permitido. Solo PDF, JPG, PNG');
+      return;
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      this.notif.error('Archivo demasiado grande. Máximo 20MB');
+      return;
+    }
+    this.examenForm.archivo = file;
+    this.examenForm.previewType = ext === 'pdf' ? 'pdf' : 'img';
+    if (ext !== 'pdf') {
+      const reader = new FileReader();
+      reader.onload = (e) => { this.examenForm.preview = e.target?.result || null; };
+      reader.readAsDataURL(file);
+    } else {
+      this.examenForm.preview = null;
+    }
+  }
+
+  removeFile() {
+    this.examenForm.archivo = null;
+    this.examenForm.preview = null;
+    this.examenForm.previewType = '';
+  }
+
+  toggleEtiqueta(etq: string) {
+    const idx = this.examenForm.Etiquetas.indexOf(etq);
+    if (idx >= 0) {
+      this.examenForm.Etiquetas.splice(idx, 1);
+    } else {
+      this.examenForm.Etiquetas.push(etq);
+    }
+  }
+
+  agregarCustomEtiqueta() {
+    const etq = this.examenForm.customEtiqueta.trim();
+    if (etq && !this.examenForm.Etiquetas.includes(etq)) {
+      this.examenForm.Etiquetas.push(etq);
+      this.examenForm.customEtiqueta = '';
+    }
+  }
+
+  quitarEtiqueta(etq: string) {
+    this.examenForm.Etiquetas = this.examenForm.Etiquetas.filter(e => e !== etq);
+  }
+
+  subirExamen() {
+    const c = this.cita();
+    if (!this.examenForm.archivo || !c) return;
+    this.uploadLoading.set(true);
+    const fd = new FormData();
+    fd.append('archivo', this.examenForm.archivo);
+    fd.append('ID_Paciente', String(c.ID_Paciente));
+    fd.append('Tipo_Examen', this.examenForm.Tipo_Examen);
+    fd.append('Etiquetas', JSON.stringify(this.examenForm.Etiquetas));
+    fd.append('Laboratorio', this.examenForm.Laboratorio);
+    fd.append('Fecha_Toma', this.examenForm.Fecha_Toma);
+    fd.append('Es_Sensible', String(this.examenForm.Es_Sensible));
+    if (this.examenForm.Notas) {
+      fd.append('Notas', this.examenForm.Notas);
+    }
+    this.examenesSvc.upload(fd).subscribe({
+      next: (res) => {
+        this.notif.success('Examen subido correctamente. Procesando OCR...');
+        this.uploadLoading.set(false);
+        this.removeFile();
+      },
+      error: (err) => {
+        this.notif.error(err.error?.message || 'Error al subir examen');
+        this.uploadLoading.set(false);
+      },
+    });
   }
 
   agregarReceta(): void {

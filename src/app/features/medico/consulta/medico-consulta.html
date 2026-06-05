@@ -83,6 +83,112 @@
 
     <div class="card border-0 shadow-sm mb-4">
       <div class="card-body">
+        <h6 class="fw-bold mb-3 section-title">Exámenes de Laboratorio</h6>
+
+        <div
+          class="drop-zone text-center p-4 mb-3 rounded-3"
+          [class.drag-over]="dragOver()"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)"
+        >
+          @if (!examenForm.archivo) {
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0c4a6e" stroke-width="1.5" class="mb-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <p class="mb-1 fw-semibold text-muted">Arrastra un archivo aquí o haz clic para seleccionar</p>
+            <p class="small text-muted mb-2">PDF, JPG o PNG — Máximo 20MB</p>
+            <input type="file" accept=".pdf,.jpg,.jpeg,.png" (change)="onFileSelected($event)" class="d-none" #fileInput />
+            <button class="btn btn-sm btn-outline-primary rounded-pill px-3" (click)="fileInput.click()">Seleccionar Archivo</button>
+          }
+        </div>
+
+        @if (examenForm.archivo) {
+          <div class="preview-box p-3 rounded-3 mb-3" style="background:#f0f7ff;">
+            <div class="d-flex align-items-center gap-3">
+              @if (examenForm.previewType === 'img' && examenForm.preview) {
+                <img [src]="examenForm.preview" class="rounded-2" style="max-width:120px;max-height:100px;object-fit:cover;" />
+              } @else if (examenForm.previewType === 'pdf') {
+                <div class="d-flex align-items-center justify-content-center rounded-2" style="width:80px;height:80px;background:#e9ecef;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#dc3545" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </div>
+              }
+              <div class="flex-grow-1">
+                <p class="fw-semibold mb-1 small">{{ examenForm.archivo.name }}</p>
+                <p class="text-muted mb-0 small">{{ (examenForm.archivo.size / 1024 / 1024).toFixed(2) }} MB</p>
+              </div>
+              <button class="btn btn-sm btn-outline-danger rounded-circle p-1" style="width:32px;height:32px;" (click)="removeFile()" title="Quitar archivo">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-12 col-md-4">
+              <label class="form-label small fw-semibold">Tipo de Examen</label>
+              <select class="form-select form-select-sm" [(ngModel)]="examenForm.Tipo_Examen">
+                @for (t of tiposExamen; track t) {
+                  <option [value]="t">{{ t }}</option>
+                }
+              </select>
+            </div>
+            <div class="col-6 col-md-4">
+              <label class="form-label small fw-semibold">Laboratorio</label>
+              <input class="form-control form-control-sm" [(ngModel)]="examenForm.Laboratorio" placeholder="Nombre del laboratorio" />
+            </div>
+            <div class="col-6 col-md-4">
+              <label class="form-label small fw-semibold">Fecha de Toma</label>
+              <input type="date" class="form-control form-control-sm" [(ngModel)]="examenForm.Fecha_Toma" />
+            </div>
+          </div>
+
+          <div class="mt-3">
+            <label class="form-label small fw-semibold">Etiquetas</label>
+            <div class="d-flex flex-wrap gap-1 mb-2">
+              @for (etq of etiquetasPredefinidas; track etq) {
+                <span class="badge rounded-pill px-3 py-2" style="cursor:pointer;"
+                  [class.bg-primary]="examenForm.Etiquetas.includes(etq)"
+                  [class.bg-light]="!examenForm.Etiquetas.includes(etq)"
+                  [class.text-dark]="!examenForm.Etiquetas.includes(etq)"
+                  (click)="toggleEtiqueta(etq)">{{ etq }}</span>
+              }
+            </div>
+            @if (examenForm.Etiquetas.length > 0) {
+              <div class="d-flex flex-wrap gap-1 mb-2">
+                @for (etq of examenForm.Etiquetas; track etq) {
+                  <span class="badge bg-info text-white rounded-pill px-3 py-2 d-flex align-items-center gap-1">
+                    {{ etq }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="cursor:pointer;" (click)="quitarEtiqueta(etq)"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </span>
+                }
+              </div>
+            }
+            <div class="input-group input-group-sm">
+              <input class="form-control" [(ngModel)]="examenForm.customEtiqueta" placeholder="Etiqueta personalizada..." (keyup.enter)="agregarCustomEtiqueta()" />
+              <button class="btn btn-outline-secondary" (click)="agregarCustomEtiqueta()">Agregar</button>
+            </div>
+          </div>
+
+          <div class="mt-3">
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" id="esSensible" [(ngModel)]="examenForm.Es_Sensible" />
+              <label class="form-check-label small text-danger fw-semibold" for="esSensible">
+                Examen sensible (VIH, salud mental, oncología) — visibilidad restringida
+              </label>
+            </div>
+          </div>
+
+          <div class="mt-3 mb-0">
+            <button class="btn btn-primary rounded-pill px-4 shadow-sm" (click)="subirExamen()" [disabled]="uploadLoading()">
+              @if (uploadLoading()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Subir y Procesar
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
         <div class="d-flex align-items-center justify-content-between mb-3">
           <h6 class="fw-bold mb-0 section-title">Medicamentos Recetados</h6>
           <button class="btn btn-sm btn-outline-primary rounded-pill px-3" (click)="agregarReceta()">
