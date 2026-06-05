@@ -1,5 +1,5 @@
 import { Component, inject, signal, computed } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, DomSanitizer, SafeResourceUrl } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConsultasService } from '../../../core/services/consultas.service';
@@ -22,6 +22,7 @@ export default class HistorialClinicoComponent {
   private notif = inject(NotificationService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private sanitizer = inject(DomSanitizer);
 
   searchTerm = signal('');
   searchResults = signal<Paciente[]>([]);
@@ -188,14 +189,17 @@ export default class HistorialClinicoComponent {
     this.generandoResumen = true;
     this.examenesSvc.generarResumen(id).subscribe({
       next: (res: any) => {
-        this.notif.success('Resumen generado con IA');
         this.generandoResumen = false;
-        const actual = this.examenSeleccionado();
-        if (actual && actual.ID_Examen === id) {
-          actual.Resumen_Medico = res.resumen?.Resumen_Medico || null;
-          actual.Resumen_Paciente = res.resumen?.Resumen_Paciente || null;
-          this.examenSeleccionado.set({ ...actual });
+        if (res.resumen?.Resumen_Medico) {
+          this.notif.success('Resumen generado con IA');
+        } else {
+          this.notif.warning('No se pudo generar resumen (espera a que termine el OCR y vuelve a intentar)');
         }
+        this.examenesSvc.getById(id).subscribe({
+          next: (full) => {
+            this.examenSeleccionado.set(full);
+          },
+        });
         const pac = this.selectedPaciente();
         if (pac) this.cargarExamenes(pac.ID_Paciente);
       },
@@ -208,6 +212,10 @@ export default class HistorialClinicoComponent {
 
   getArchivoUrl(id: number): string {
     return this.examenesSvc.getArchivoUrl(id);
+  }
+
+  getSafeUrl(id: number): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(this.getArchivoUrl(id));
   }
 
   getAlertClass(estado: string): string {

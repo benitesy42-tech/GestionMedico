@@ -212,11 +212,31 @@ export default class MedicoConsultaComponent {
         this.notif.success('Examen subido correctamente');
         this.uploadLoading.set(false);
         this.uploadSuccess.set(true);
-        this.uploadedExamenId.set(res.examen?.ID_Examen || null);
+        const id = res.examen?.ID_Examen || null;
+        this.uploadedExamenId.set(id);
+        if (id) this.esperarOcrYActualizar(id);
       },
       error: (err) => {
         this.notif.error(err.error?.message || 'Error al subir examen');
         this.uploadLoading.set(false);
+      },
+    });
+  }
+
+  private esperarOcrYActualizar(id: number, intentos = 0): void {
+    if (intentos > 30) return;
+    this.examenesSvc.getById(id).subscribe({
+      next: (examen) => {
+        if (examen.Texto_OCR) {
+          this.examenForm.Tipo_Examen = examen.Tipo_Examen;
+          this.examenForm.Etiquetas = examen.Etiquetas || [];
+          this.notif.success('OCR completado — tipo y etiquetas actualizados');
+        } else {
+          setTimeout(() => this.esperarOcrYActualizar(id, intentos + 1), 2000);
+        }
+      },
+      error: () => {
+        setTimeout(() => this.esperarOcrYActualizar(id, intentos + 1), 2000);
       },
     });
   }
