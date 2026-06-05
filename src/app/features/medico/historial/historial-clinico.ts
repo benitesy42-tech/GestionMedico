@@ -1,5 +1,6 @@
 import { Component, inject, signal, computed } from '@angular/core';
-import { DatePipe, DomSanitizer, SafeResourceUrl } from '@angular/common';
+import { DatePipe } from '@angular/common';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ConsultasService } from '../../../core/services/consultas.service';
@@ -22,7 +23,7 @@ export default class HistorialClinicoComponent {
   private notif = inject(NotificationService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private sanitizer = inject(DomSanitizer);
+  private sanitizer = inject(DomSanitizer) as DomSanitizer;
 
   searchTerm = signal('');
   searchResults = signal<Paciente[]>([]);
