@@ -235,15 +235,27 @@
               }
             </div>
 
-            @if (resumenMedico(); as rm) {
-              <div class="bg-white rounded-3 p-3 border mb-3">
-                <small class="text-muted d-block fw-semibold mb-1">👨‍⚕️ Resumen para el médico</small>
+            @if (resumenMedico() || resumenPaciente()) {
+              <div class="d-flex flex-wrap gap-2 mb-3">
+                @if (resumenMedico()) {
+                  <button class="btn btn-sm rounded-pill px-3" [class.btn-dark]="showResumenMedico()" [class.btn-outline-dark]="!showResumenMedico()" (click)="showResumenMedico.set(!showResumenMedico())">
+                    👨‍⚕️ Resumen médico
+                  </button>
+                }
+                @if (resumenPaciente()) {
+                  <button class="btn btn-sm rounded-pill px-3" [class.btn-info]="showResumenPaciente()" [class.btn-outline-info]="!showResumenPaciente()" (click)="showResumenPaciente.set(!showResumenPaciente())">
+                    🗣️ Resumen paciente
+                  </button>
+                }
+              </div>
+            }
+            @if (showResumenMedico() && resumenMedico(); as rm) {
+              <div class="bg-white rounded-3 p-3 border mb-2">
                 <p class="mb-0 small lh-sm" style="white-space:pre-wrap;">{{ rm }}</p>
               </div>
             }
-            @if (resumenPaciente(); as rp) {
-              <div class="bg-info bg-opacity-10 rounded-3 p-3 border border-info border-opacity-10 mb-3">
-                <small class="text-muted d-block fw-semibold mb-1">🗣️ Resumen para el paciente</small>
+            @if (showResumenPaciente() && resumenPaciente(); as rp) {
+              <div class="bg-info bg-opacity-10 rounded-3 p-3 border border-info border-opacity-10 mb-2">
                 <p class="mb-0 small lh-sm" style="white-space:pre-wrap;">{{ rp }}</p>
               </div>
             }

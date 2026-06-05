@@ -69,6 +69,8 @@ export default class MedicoConsultaComponent {
   resumenMedico = signal<string | null>(null);
   resumenPaciente = signal<string | null>(null);
   processingError = signal<string | null>(null);
+  showResumenMedico = signal(false);
+  showResumenPaciente = signal(false);
 
   constructor() {
     this.idCita = Number(this.route.snapshot.paramMap.get('idCita'));

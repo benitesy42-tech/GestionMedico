@@ -43,6 +43,8 @@ export default class HistorialClinicoComponent {
   examenesLoading = signal(false);
   examenSeleccionado = signal<Examen | null>(null);
   generandoResumen = false;
+  showHistorialResumenMedico = signal(false);
+  showHistorialResumenPaciente = signal(false);
   filtroExamenTipo = signal('');
   filtroExamenEstado = signal('');
   filtroExamenLab = signal('');

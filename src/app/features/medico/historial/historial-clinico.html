@@ -470,20 +470,28 @@
               </div>
             </div>
             <div class="col-12 col-lg-6">
-              @if (ex.Resumen_Medico) {
-                <div class="mb-3">
-                  <h6 class="fw-bold small text-uppercase text-muted mb-2">👨‍⚕️ Resumen médico</h6>
-                  <div class="bg-light rounded-4 p-3 border">
-                    <p class="mb-0 small lh-sm" style="white-space:pre-wrap;">{{ ex.Resumen_Medico }}</p>
-                  </div>
+              @if (ex.Resumen_Medico || ex.Resumen_Paciente) {
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                  @if (ex.Resumen_Medico) {
+                    <button class="btn btn-sm rounded-pill px-3" [class.btn-dark]="showHistorialResumenMedico()" [class.btn-outline-dark]="!showHistorialResumenMedico()" (click)="showHistorialResumenMedico.set(!showHistorialResumenMedico())">
+                      👨‍⚕️ Resumen médico
+                    </button>
+                  }
+                  @if (ex.Resumen_Paciente) {
+                    <button class="btn btn-sm rounded-pill px-3" [class.btn-info]="showHistorialResumenPaciente()" [class.btn-outline-info]="!showHistorialResumenPaciente()" (click)="showHistorialResumenPaciente.set(!showHistorialResumenPaciente())">
+                      🗣️ Resumen paciente
+                    </button>
+                  }
                 </div>
               }
-              @if (ex.Resumen_Paciente) {
-                <div class="mb-3">
-                  <h6 class="fw-bold small text-uppercase text-muted mb-2">🗣️ Resumen para el paciente</h6>
-                  <div class="bg-info bg-opacity-10 rounded-4 p-3 border border-info border-opacity-10">
-                    <p class="mb-0 small lh-sm" style="white-space:pre-wrap;">{{ ex.Resumen_Paciente }}</p>
-                  </div>
+              @if (showHistorialResumenMedico() && ex.Resumen_Medico) {
+                <div class="bg-light rounded-4 p-3 border mb-3">
+                  <p class="mb-0 small lh-sm" style="white-space:pre-wrap;">{{ ex.Resumen_Medico }}</p>
+                </div>
+              }
+              @if (showHistorialResumenPaciente() && ex.Resumen_Paciente) {
+                <div class="bg-info bg-opacity-10 rounded-4 p-3 border border-info border-opacity-10 mb-3">
+                  <p class="mb-0 small lh-sm" style="white-space:pre-wrap;">{{ ex.Resumen_Paciente }}</p>
                 </div>
               }
             </div>
