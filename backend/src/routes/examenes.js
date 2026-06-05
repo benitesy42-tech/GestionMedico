@@ -44,46 +44,58 @@ function getClientIp(req) {
 async function ejecutarOCR(rutaArchivo) {
     const ext = path.extname(rutaArchivo).toLowerCase();
     if (ext === '.pdf') {
+        // Paso 1: extraer texto directo del PDF (PDFs con texto seleccionable)
         try {
-            let pdfjsLib;
-            try {
-                pdfjsLib = require('pdfjs-dist');
-            } catch (e) {
-                try {
-                    pdfjsLib = require('pdfjs-dist/legacy/build/pdf');
-                } catch (e2) {
-                    console.error('pdfjs-dist no disponible, fallback a Tesseract:', e2.message);
-                    pdfjsLib = null;
-                }
+            console.log('PDF: extrayendo texto directo con pdfjs-dist...');
+            const pdfjsLib = await import('pdfjs-dist');
+            const data = new Uint8Array(fs.readFileSync(rutaArchivo));
+            const doc = await pdfjsLib.getDocument({ data }).promise;
+            let texto = '';
+            for (let i = 1; i <= doc.numPages; i++) {
+                const page = await doc.getPage(i);
+                const content = await page.getTextContent();
+                texto += content.items.map(item => item.str).join(' ') + '\n';
             }
-            if (pdfjsLib) {
-                const data = new Uint8Array(fs.readFileSync(rutaArchivo));
-                const doc = await pdfjsLib.getDocument({ data }).promise;
-                let texto = '';
-                for (let i = 1; i <= doc.numPages; i++) {
-                    const page = await doc.getPage(i);
-                    const content = await page.getTextContent();
-                    texto += content.items.map(item => item.str).join(' ') + '\n';
-                }
-                texto = texto.trim();
-                if (texto) {
-                    console.log('PDF texto extraído, chars:', texto.length);
-                    return { texto, confianza: 100 };
-                }
+            texto = texto.trim();
+            console.log('PDF texto directo, chars:', texto.length);
+            if (texto.length > 20) {
+                return { texto, confianza: 100 };
             }
+            console.log('PDF texto muy corto, pasando a OCR sobre imagen...');
         } catch (err) {
-            console.error('Error extrayendo PDF:', err.message);
+            console.error('PDF texto directo falló:', err.message);
+        }
+        // Paso 2: convertir PDF a imagen con pdf2pic+sharp y OCR
+        try {
+            console.log('PDF: convirtiendo a imagen con pdf2pic...');
+            const { fromBuffer } = require('pdf2pic');
+            const pdfBuffer = fs.readFileSync(rutaArchivo);
+            const converter = fromBuffer(pdfBuffer, {
+                density: 200, format: 'png', width: 1654, height: 2339,
+            });
+            const pageImage = await converter(1, { responseType: 'buffer' });
+            console.log('PDF: imagen generada, OCR con Tesseract...');
+            const worker = await createWorker('spa');
+            const { data } = await worker.recognize(pageImage.buffer);
+            await worker.terminate();
+            const texto = (data.text || '').trim();
+            console.log('OCR sobre imagen PDF, chars:', texto.length, 'confianza:', data.confidence);
+            if (texto) return { texto, confianza: data.confidence || 0 };
+        } catch (err) {
+            console.error('PDF OCR con pdf2pic falló:', err.message);
         }
     }
+    // Imagen u otros formatos: OCR directo
     try {
+        console.log('OCR directo con Tesseract...');
         const worker = await createWorker('spa');
         const { data } = await worker.recognize(rutaArchivo);
         await worker.terminate();
         const texto = (data.text || '').trim();
-        console.log('OCR completado, chars:', texto.length, 'confianza:', data.confidence);
+        console.log('OCR directo completado, chars:', texto.length, 'confianza:', data.confidence);
         return { texto, confianza: data.confidence || 0 };
     } catch (err) {
-        console.error('Error OCR:', err.message);
+        console.error('OCR directo falló:', err.message);
         return { texto: '', confianza: 0 };
     }
 }
