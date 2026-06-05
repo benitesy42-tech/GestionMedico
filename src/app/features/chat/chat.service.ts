@@ -47,7 +47,10 @@ export class ChatService {
       const esConvActiva = convActual && msg.conversacion_id === convActual.id;
 
       if (esConvActiva) {
-        this.mensajes.update((m) => [...m, msg]);
+        this.mensajes.update((m) => {
+          if (m.some((x) => x.id === msg.id)) return m;
+          return [...m, msg];
+        });
         if (msg.remitente_id !== null) {
           this.socket?.emit('conversacion:abrir', { conversacion_id: convActual.id });
         }

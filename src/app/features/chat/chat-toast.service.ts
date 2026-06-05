@@ -8,6 +8,25 @@ export interface ChatToastItem {
   conversacion_id: number;
 }
 
+function playSound() {
+  try {
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.setValueAtTime(660, ctx.currentTime + 0.12);
+    gain.gain.setValueAtTime(0.25, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.35);
+  } catch {
+    // Audio not available
+  }
+}
+
 @Injectable({ providedIn: 'root' })
 export class ChatToastService {
   toasts = signal<ChatToastItem[]>([]);
@@ -16,9 +35,10 @@ export class ChatToastService {
   mostrar(toast: Omit<ChatToastItem, 'id'>) {
     const id = ++this.counter;
     this.toasts.update((t) => [...t, { ...toast, id }]);
+    if (toast.tipo === 'cita') playSound();
     setTimeout(() => {
       this.toasts.update((t) => t.filter((x) => x.id !== id));
-    }, 4000);
+    }, 10000);
   }
 
   dismiss(id: number) {
