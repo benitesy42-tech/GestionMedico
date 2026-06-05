@@ -174,14 +174,19 @@ function autoDetectarTipoYEtiquetas(textoOCR) {
 
 async function generarResumenConGroq(textoOCR, valores, tipoExamen) {
     const GROQ_API_KEY = process.env.GROQ_API_KEY;
-    if (!GROQ_API_KEY || !textoOCR) {
+    if (!GROQ_API_KEY) {
+        console.error('GROQ_API_KEY no configurada');
         return { resumenMedico: null, resumenPaciente: null };
     }
     try {
         const { default: Groq } = await import('groq-sdk');
         const groq = new Groq({ apiKey: GROQ_API_KEY });
-        const promptMedico = `Eres un médico especialista. Genera un resumen técnico conciso de este examen de laboratorio (Tipo: ${tipoExamen}). Enfócate en hallazgos relevantes, valores alterados e interpretación clínica breve.\n\nTEXTO DEL EXAMEN:\n${textoOCR}\n\nVALORES EXTRAÍDOS:\n${JSON.stringify(valores, null, 2)}\n\nResumen técnico:`;
-        const promptPaciente = `Eres un médico explicando resultados a un paciente. Genera un resumen en lenguaje sencillo y claro, sin tecnicismos, explicando qué significa el resultado del examen.\n\nTEXTO DEL EXAMEN:\n${textoOCR}\n\nVALORES EXTRAÍDOS:\n${JSON.stringify(valores, null, 2)}\n\nResumen para el paciente:`;
+        const texto = textoOCR || 'Sin texto OCR disponible';
+        const resumenValores = valores && valores.length > 0
+            ? `VALORES EXTRAÍDOS:\n${JSON.stringify(valores, null, 2)}`
+            : 'No se extrajeron valores numéricos.';
+        const promptMedico = `Eres un médico especialista. Genera un resumen técnico conciso de este examen de laboratorio (Tipo: ${tipoExamen || 'No especificado'}). Enfócate en hallazgos relevantes, valores alterados e interpretación clínica breve.\n\n${resumenValores}\n\nTEXTO DEL EXAMEN:\n${texto}\n\nResumen técnico:`;
+        const promptPaciente = `Eres un médico explicando resultados a un paciente. Genera un resumen en lenguaje sencillo y claro, sin tecnicismos, explicando qué significa el resultado del examen.\n\n${resumenValores}\n\nTEXTO DEL EXAMEN:\n${texto}\n\nResumen para el paciente:`;
         const [resMedico, resPaciente] = await Promise.all([
             groq.chat.completions.create({
                 messages: [{ role: 'user', content: promptMedico }],
@@ -194,6 +199,7 @@ async function generarResumenConGroq(textoOCR, valores, tipoExamen) {
                 max_tokens: 500,
             }),
         ]);
+        console.log('Groq responses:', resMedico.choices[0]?.message?.content?.substring(0, 100), resPaciente.choices[0]?.message?.content?.substring(0, 100));
         return {
             resumenMedico: resMedico.choices[0]?.message?.content || null,
             resumenPaciente: resPaciente.choices[0]?.message?.content || null,

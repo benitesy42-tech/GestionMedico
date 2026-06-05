@@ -435,13 +435,7 @@
               }
             </div>
             <div class="col-12 col-lg-6">
-              @if (ex.Texto_OCR === 'ERROR') {
-                <div class="alert alert-warning py-2 small mb-2 rounded-3">OCR falló. Puedes intentar generar resumen.</div>
-              }
-              @if (ex.Texto_OCR == null) {
-                <div class="alert alert-info py-2 small mb-2 rounded-3">OCR en proceso... espera unos segundos.</div>
-              }
-              @if (ex.Texto_OCR != null && !ex.Resumen_Medico) {
+              @if (!ex.Resumen_Medico) {
                 <button class="btn btn-outline-info btn-sm rounded-pill px-3 w-100 mb-2" (click)="generarResumenIA(ex.ID_Examen)" [disabled]="generandoResumen">
                   @if (generandoResumen) {
                     <span class="spinner-border spinner-border-sm me-1"></span> Generando resumen...
@@ -449,8 +443,7 @@
                     Generar resumen con IA
                   }
                 </button>
-              }
-              @if (ex.Resumen_Medico) {
+              } @else {
                 <div class="mb-2 d-flex gap-2">
                   <button class="btn btn-outline-info btn-sm rounded-pill px-3" (click)="generarResumenIA(ex.ID_Examen)" [disabled]="generandoResumen">
                     @if (generandoResumen) {
@@ -536,10 +529,6 @@
           </div>
         </div>
         <div class="modal-footer border-0">
-          <a [href]="getArchivoUrl(ex.ID_Examen)" target="_blank" class="btn btn-outline-primary rounded-pill px-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            Abrir archivo original
-          </a>
           <button class="btn btn-secondary rounded-pill px-3" (click)="cerrarExamen()">Cerrar</button>
         </div>
       </div>
