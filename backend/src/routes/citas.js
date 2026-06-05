@@ -141,35 +141,45 @@ router.post('/', authenticateToken, async(req, res) => {
         const citaCreada = result.rows[0];
 
         const io = req.app.get('io');
+        console.log('[Citas] io obtenido:', !!io, 'req.app:', !!req.app);
         if (io) {
             (async () => {
                 try {
                     const paci = await pool.query('SELECT Nombres, Apellidos FROM Paciente WHERE ID_Paciente = $1', [ID_Paciente]);
                     const paciNombre = paci.rows.length > 0 ? `${paci.rows[0].nombres} ${paci.rows[0].apellidos}` : 'Paciente';
+                    console.log('[Citas] Paciente:', paciNombre);
 
                     const medi = await pool.query('SELECT ID_Usuario FROM Medico WHERE ID_Medico = $1', [ID_Medico]);
                     const medUserId = medi.rows[0]?.id_usuario;
+                    console.log('[Citas] medUserId:', medUserId, 'ID_Medico:', ID_Medico);
 
                     const recep = await pool.query(
                         `SELECT u.ID_Usuario FROM Usuario u JOIN Rol r ON u.ID_Rol = r.ID_Rol WHERE r.Nombre_Rol = 'Recepcionista' LIMIT 1`,
                     );
                     const recepUserId = recep.rows[0]?.id_usuario;
+                    console.log('[Citas] recepUserId:', recepUserId);
 
                     if (medUserId && recepUserId) {
                         const fechaFormateada = new Date(Fecha_Hora).toLocaleString('es-MX', {
                             day: '2-digit', month: '2-digit', year: 'numeric',
                             hour: '2-digit', minute: '2-digit',
                         });
+                        console.log('[Citas] Enviando notificacion...');
                         await emitirNotificacionSistema(
                             io, recepUserId, medUserId,
                             `Nueva cita agendada: ${paciNombre} — ${fechaFormateada}`,
                             medUserId,
                         );
+                        console.log('[Citas] Notificacion enviada OK');
+                    } else {
+                        console.log('[Citas] Saltando notificacion: medUserId=', medUserId, 'recepUserId=', recepUserId);
                     }
                 } catch (e) {
                     console.error('Error en notificación de cita:', e);
                 }
             })();
+        } else {
+            console.log('[Citas] io es null/undefined');
         }
 
         res.status(201).json({
