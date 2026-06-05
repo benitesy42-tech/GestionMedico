@@ -62,7 +62,7 @@ router.get('/conversaciones', authenticateToken, async (req, res) => {
               ) AS Otro_Rol
        FROM Conversacion c
        WHERE c.ID_Usuario_1 = $1 OR c.ID_Usuario_2 = $1
-       ORDER BY "Ultimo_Mensaje_Hora" DESC NULLS LAST`,
+        ORDER BY ultimo_mensaje_hora DESC NULLS LAST`,
       [userId],
     );
 
