@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PacientesService } from '../../../core/services/pacientes.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { Paciente } from '../../../core/models/paciente';
 
 @Component({
@@ -10,6 +11,7 @@ import { Paciente } from '../../../core/models/paciente';
 })
 export default class RecepcionPacientesComponent {
   private pacientesSvc = inject(PacientesService);
+  private notif = inject(NotificationService);
 
   pacientes = signal<Paciente[]>([]);
   searchTerm = signal('');
@@ -73,7 +75,7 @@ export default class RecepcionPacientesComponent {
       },
       error: (err) => {
         this.loading.set(false);
-        alert(err.error?.message || 'Error al guardar paciente');
+        this.notif.error(err.error?.message || 'Error al guardar paciente');
       },
     });
   }

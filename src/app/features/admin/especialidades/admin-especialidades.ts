@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { EspecialidadesService } from '../../../core/services/especialidades.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { Especialidad } from '../../../core/models/especialidad';
 
 @Component({
@@ -10,6 +11,7 @@ import { Especialidad } from '../../../core/models/especialidad';
 })
 export default class AdminEspecialidadesComponent {
   private espSvc = inject(EspecialidadesService);
+  private notif = inject(NotificationService);
 
   especialidades = signal<Especialidad[]>([]);
   showForm = signal(false);
@@ -59,9 +61,13 @@ export default class AdminEspecialidadesComponent {
 
   delete(id: number): void {
     if (confirm('¿Está seguro de eliminar esta especialidad?')) {
-      this.espSvc.delete(id).subscribe(() =>
-        this.espSvc.getAll().subscribe((data) => this.especialidades.set(data)),
-      );
+      this.espSvc.delete(id).subscribe({
+        next: () => {
+          this.espSvc.getAll().subscribe((data) => this.especialidades.set(data));
+          this.notif.success('Especialidad eliminada');
+        },
+        error: () => this.notif.error('No se puede eliminar: tiene médicos asociados'),
+      });
     }
   }
 }

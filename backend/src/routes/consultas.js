@@ -10,18 +10,19 @@ router.get('/paciente/:idPaciente', authenticateToken, async(req, res) => {
         const { idPaciente } = req.params;
         const { desde, hasta } = req.query;
 
-        let whereClause = 'WHERE c.ID_Paciente = $1';
+        const conditions = ['c.ID_Paciente = $1'];
         const params = [idPaciente];
-        let paramIdx = 2;
 
         if (desde) {
-            whereClause += ` AND cm.Fecha_Registro >= $${paramIdx++}`;
+            conditions.push(`cm.Fecha_Registro >= $${params.length + 1}`);
             params.push(desde);
         }
         if (hasta) {
-            whereClause += ` AND cm.Fecha_Registro <= $${paramIdx++}`;
+            conditions.push(`cm.Fecha_Registro <= $${params.length + 1}`);
             params.push(hasta + 'T23:59:59');
         }
+
+        const whereClause = 'WHERE ' + conditions.join(' AND ');
 
         const result = await pool.query(
             `SELECT cm.*, c.Fecha_Hora,

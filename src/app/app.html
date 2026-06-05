@@ -1,1 +1,20 @@
 <router-outlet />
+
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+  @for (n of notif.notifications(); track n.id) {
+    <div
+      class="toast align-items-center border-0 show mb-2"
+      [class.bg-success]="n.type === 'success'"
+      [class.bg-danger]="n.type === 'error'"
+      [class.bg-warning]="n.type === 'warning'"
+      [class.bg-info]="n.type === 'info'"
+      role="alert"
+    >
+      <div class="d-flex">
+        <div class="toast-body text-white fw-semibold small">
+          {{ n.message }}
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { PagosService } from '../../../core/services/pagos.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { Pago } from '../../../core/models/pago';
 
 @Component({
@@ -12,6 +13,7 @@ import { Pago } from '../../../core/models/pago';
 })
 export default class RecepcionPagosComponent {
   private pagosSvc = inject(PagosService);
+  private notif = inject(NotificationService);
 
   pagos = signal<Pago[]>([]);
   showForm = signal(false);
@@ -59,6 +61,7 @@ export default class RecepcionPagosComponent {
         this.loading.set(false);
         this.showForm.set(false);
         this.loadPagos();
+        this.notif.success('Pago registrado');
       },
       error: (err: HttpErrorResponse) => {
         this.loading.set(false);
@@ -69,7 +72,7 @@ export default class RecepcionPagosComponent {
 
   anular(id: number): void {
     if (confirm('¿Anular este pago?')) {
-      this.pagosSvc.anular(id).subscribe(() => this.loadPagos());
+      this.pagosSvc.anular(id).subscribe(() => { this.loadPagos(); this.notif.success('Pago anulado'); });
     }
   }
 }

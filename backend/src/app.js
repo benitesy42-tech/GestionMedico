@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 
 const authRoutes = require('./routes/auth');
@@ -13,6 +14,8 @@ const dashboardRoutes = require('./routes/dashboard');
 
 const app = express();
 
+app.use(helmet());
+app.disable('x-powered-by');
 app.use(cors());
 app.use(express.json());
 

@@ -42,13 +42,16 @@
               <td>${{ formatMonto(p.Monto) }}</td>
               <td>{{ p.Fecha_Pago | date:'dd/MM/yyyy HH:mm' }}</td>
               <td>
+                <span class="badge rounded-pill" [class.bg-success]="p.Estado_Pago === 'Completado'" [class.bg-warning]="p.Estado_Pago === 'Pendiente'" [class.bg-danger]="p.Estado_Pago === 'Anulado'">{{ p.Estado_Pago }}</span>
+              </td>
+              <td>
                 @if (p.Estado_Pago === 'Completado') {
                   <button class="btn btn-sm btn-outline-danger" (click)="anular(p.ID_Pago)">Anular</button>
                 }
               </td>
             </tr>
           } @empty {
-            <tr><td colspan="6" class="text-center py-4 text-muted">No hay pagos registrados</td></tr>
+            <tr><td colspan="7" class="text-center py-4 text-muted">No hay pagos registrados</td></tr>
           }
         </tbody>
       </table>

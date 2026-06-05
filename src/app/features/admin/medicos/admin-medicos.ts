@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MedicosService } from '../../../core/services/medicos.service';
 import { EspecialidadesService } from '../../../core/services/especialidades.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { Medico, MedicoDto } from '../../../core/models/medico';
 import { Especialidad } from '../../../core/models/especialidad';
 
@@ -13,6 +14,7 @@ import { Especialidad } from '../../../core/models/especialidad';
 export default class AdminMedicosComponent {
   private medicosSvc = inject(MedicosService);
   private espSvc = inject(EspecialidadesService);
+  private notif = inject(NotificationService);
 
   medicos = signal<Medico[]>([]);
   especialidades = signal<Especialidad[]>([]);
@@ -86,7 +88,7 @@ export default class AdminMedicosComponent {
         },
         error: () => {
           this.loading.set(false);
-          alert('Error al actualizar médico');
+          this.notif.error('Error al actualizar médico');
         },
       });
     } else {
@@ -98,7 +100,7 @@ export default class AdminMedicosComponent {
         },
         error: () => {
           this.loading.set(false);
-          alert('Error al crear médico. Verifica que el usuario o colegiatura no estén duplicados.');
+          this.notif.error('Error al crear médico. Verifica que el usuario o colegiatura no estén duplicados.');
         },
       });
     }
@@ -107,8 +109,8 @@ export default class AdminMedicosComponent {
   delete(id: number): void {
     if (confirm('¿Está seguro de eliminar este médico?')) {
       this.medicosSvc.delete(id).subscribe({
-        next: () => this.loadData(),
-        error: () => alert('Error al eliminar médico'),
+        next: () => { this.loadData(); this.notif.success('Médico eliminado'); },
+        error: () => this.notif.error('Error al eliminar médico'),
       });
     }
   }

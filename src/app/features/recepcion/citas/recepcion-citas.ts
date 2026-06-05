@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { CitasService } from '../../../core/services/citas.service';
 import { MedicosService } from '../../../core/services/medicos.service';
 import { PacientesService } from '../../../core/services/pacientes.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { CitaView, CitaDto } from '../../../core/models/cita';
 import { Medico } from '../../../core/models/medico';
 import { Paciente } from '../../../core/models/paciente';
@@ -17,6 +18,7 @@ export default class RecepcionCitasComponent {
   private citasSvc = inject(CitasService);
   private medicosSvc = inject(MedicosService);
   private pacientesSvc = inject(PacientesService);
+  private notif = inject(NotificationService);
 
   citas = signal<CitaView[]>([]);
   medicos = signal<Medico[]>([]);
@@ -26,6 +28,7 @@ export default class RecepcionCitasComponent {
 
   filterDate = signal('');
   searchPaciente = signal('');
+  pacientesFull = signal<Paciente[]>([]);
 
   form: CitaDto = {
     ID_Paciente: 0,
@@ -40,7 +43,10 @@ export default class RecepcionCitasComponent {
     this.minDateTime = ahora.toISOString().slice(0, 16);
     this.loadCitas();
     this.medicosSvc.getAll().subscribe((data) => this.medicos.set(data));
-    this.pacientesSvc.getAll().subscribe((data) => this.pacientes.set(data));
+    this.pacientesSvc.getAll().subscribe((data) => {
+      this.pacientes.set(data);
+      this.pacientesFull.set(data);
+    });
   }
 
   private loadCitas(): void {
@@ -55,8 +61,8 @@ export default class RecepcionCitasComponent {
 
   get filteredPacientes() {
     const term = this.searchPaciente().toLowerCase();
-    if (!term) return this.pacientes();
-    return this.pacientes().filter(
+    if (!term) return this.pacientesFull();
+    return this.pacientesFull().filter(
       (p) =>
         p.Nombres.toLowerCase().includes(term) ||
         p.Apellidos.toLowerCase().includes(term) ||
@@ -101,7 +107,7 @@ export default class RecepcionCitasComponent {
 
   delete(id: number): void {
     if (confirm('¿Cancelar esta cita?')) {
-      this.citasSvc.delete(id).subscribe(() => this.loadCitas());
+      this.citasSvc.delete(id).subscribe(() => { this.loadCitas(); this.notif.success('Cita cancelada'); });
     }
   }
 }

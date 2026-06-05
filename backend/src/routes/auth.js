@@ -1,13 +1,27 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
 const pool = require('../db');
 require('dotenv').config();
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET || 'sgcm_jwt_secret_key_2026';
 
-router.post('/login', async (req, res) => {
+if (!process.env.JWT_SECRET) {
+  console.error('FATAL: JWT_SECRET no está definido en las variables de entorno');
+  process.exit(1);
+}
+const JWT_SECRET = process.env.JWT_SECRET;
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { message: 'Demasiados intentos. Intente de nuevo en 15 minutos.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+router.post('/login', loginLimiter, async (req, res) => {
   try {
     const { Username_Correo, Password } = req.body;
 
