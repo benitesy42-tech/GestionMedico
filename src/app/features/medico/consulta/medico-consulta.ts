@@ -65,7 +65,10 @@ export default class MedicoConsultaComponent {
   dragOver = signal(false);
   uploadSuccess = signal(false);
   uploadedExamenId = signal<number | null>(null);
-  generandoResumen = signal(false);
+  processingStatus = signal<'uploading'|'ocr'|'generating'|'complete'|'error'>('uploading');
+  resumenMedico = signal<string | null>(null);
+  resumenPaciente = signal<string | null>(null);
+  processingError = signal<string | null>(null);
 
   constructor() {
     this.idCita = Number(this.route.snapshot.paramMap.get('idCita'));
@@ -196,6 +199,7 @@ export default class MedicoConsultaComponent {
     const c = this.cita();
     if (!this.examenForm.archivo || !c) return;
     this.uploadLoading.set(true);
+    this.processingStatus.set('uploading');
     const fd = new FormData();
     fd.append('archivo', this.examenForm.archivo);
     fd.append('ID_Paciente', String(c.ID_Paciente));
@@ -209,52 +213,50 @@ export default class MedicoConsultaComponent {
     }
     this.examenesSvc.upload(fd).subscribe({
       next: (res) => {
-        this.notif.success('Examen subido correctamente');
         this.uploadLoading.set(false);
         this.uploadSuccess.set(true);
         const id = res.examen?.ID_Examen || null;
         this.uploadedExamenId.set(id);
-        if (id) this.esperarOcrYActualizar(id);
+        if (id) this.esperarProcesamiento(id);
       },
       error: (err) => {
         this.notif.error(err.error?.message || 'Error al subir examen');
         this.uploadLoading.set(false);
+        this.processingStatus.set('error');
       },
     });
   }
 
-  private esperarOcrYActualizar(id: number, intentos = 0): void {
-    if (intentos > 45) return;
+  private esperarProcesamiento(id: number, intentos = 0): void {
+    if (intentos > 90) {
+      this.processingStatus.set('error');
+      this.processingError.set('Tiempo de espera agotado');
+      return;
+    }
     this.examenesSvc.getById(id).subscribe({
       next: (examen) => {
+        if (examen.Resumen_Medico) {
+          this.resumenMedico.set(examen.Resumen_Medico);
+          this.resumenPaciente.set(examen.Resumen_Paciente);
+          this.processingStatus.set('complete');
+          return;
+        }
         if (examen.Texto_OCR === 'ERROR') {
-          this.notif.warning('OCR falló — puedes generar resumen manualmente después');
-        } else if (examen.Texto_OCR) {
+          this.processingStatus.set('error');
+          this.processingError.set('No se pudo leer el contenido del examen');
+          return;
+        }
+        if (examen.Texto_OCR) {
           this.examenForm.Tipo_Examen = examen.Tipo_Examen;
           this.examenForm.Etiquetas = examen.Etiquetas || [];
-          this.notif.success('OCR completado — tipo y etiquetas actualizados');
+          this.processingStatus.set('generating');
         } else {
-          setTimeout(() => this.esperarOcrYActualizar(id, intentos + 1), 2000);
+          this.processingStatus.set('ocr');
         }
+        setTimeout(() => this.esperarProcesamiento(id, intentos + 1), 2000);
       },
       error: () => {
-        setTimeout(() => this.esperarOcrYActualizar(id, intentos + 1), 2000);
-      },
-    });
-  }
-
-  generarResumenIA(): void {
-    const id = this.uploadedExamenId();
-    if (!id) return;
-    this.generandoResumen.set(true);
-    this.examenesSvc.generarResumen(id).subscribe({
-      next: (res: any) => {
-        this.notif.success('Resumen generado con IA');
-        this.generandoResumen.set(false);
-      },
-      error: (err) => {
-        this.notif.error(err.error?.message || 'Error al generar resumen');
-        this.generandoResumen.set(false);
+        setTimeout(() => this.esperarProcesamiento(id, intentos + 1), 2000);
       },
     });
   }

@@ -325,6 +325,24 @@ router.post('/upload', authenticateToken, upload.single('archivo'), async (req, 
                     );
                 } catch (e) { /* ignore */ }
             }
+            // Auto-generar resumen IA después del OCR
+            try {
+                const examenActual = await pool.query('SELECT * FROM Examen WHERE ID_Examen = $1', [examen.id_examen]);
+                const row = examenActual.rows[0];
+                if (row && row.texto_ocr && row.texto_ocr !== 'ERROR') {
+                    const valoresDB = await pool.query('SELECT * FROM Valor_Examen WHERE ID_Examen = $1', [examen.id_examen]);
+                    const resumen = await generarResumenConGroq(row.texto_ocr, valoresDB.rows, row.tipo_examen);
+                    if (resumen.resumenMedico) {
+                        await pool.query(
+                            'UPDATE Examen SET Resumen_Medico = $1, Resumen_Paciente = $2 WHERE ID_Examen = $3',
+                            [resumen.resumenMedico, resumen.resumenPaciente, examen.id_examen]
+                        );
+                        console.log('Resumen IA auto-generado para examen', examen.id_examen);
+                    }
+                }
+            } catch (err) {
+                console.error('Error auto-generando resumen IA:', err.message);
+            }
         })();
     } catch (err) {
         console.error('Error subiendo examen:', err);

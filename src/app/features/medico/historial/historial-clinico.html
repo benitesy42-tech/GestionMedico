@@ -427,13 +427,16 @@
         </div>
         <div class="modal-body px-4 pt-3">
           @if (!ex.Resumen_Medico) {
-            <button class="btn btn-outline-info rounded-pill px-4 w-100 mb-4" (click)="generarResumenIA(ex.ID_Examen)" [disabled]="generandoResumen">
-              @if (generandoResumen) {
-                <span class="spinner-border spinner-border-sm me-2"></span> Generando resumen...
-              } @else {
-                🤖 Generar resumen con IA
-              }
-            </button>
+            <div class="alert alert-warning d-flex align-items-center gap-2 py-2 px-3 mb-4 rounded-4">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span class="small flex-grow-1">No se pudo generar el resumen automáticamente</span>
+              <button class="btn btn-outline-warning btn-sm rounded-pill px-3 flex-shrink-0" (click)="generarResumenIA(ex.ID_Examen)" [disabled]="generandoResumen">
+                @if (generandoResumen) {
+                  <span class="spinner-border spinner-border-sm me-1"></span>
+                }
+                Reintentar
+              </button>
+            </div>
           } @else {
             <div class="d-flex gap-2 mb-4">
               <button class="btn btn-outline-info rounded-pill px-4" (click)="generarResumenIA(ex.ID_Examen)" [disabled]="generandoResumen">
