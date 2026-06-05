@@ -63,6 +63,9 @@ export default class MedicoConsultaComponent {
   };
   uploadLoading = signal(false);
   dragOver = signal(false);
+  uploadSuccess = signal(false);
+  uploadedExamenId = signal<number | null>(null);
+  generandoResumen = signal(false);
 
   constructor() {
     this.idCita = Number(this.route.snapshot.paramMap.get('idCita'));
@@ -100,6 +103,46 @@ export default class MedicoConsultaComponent {
     }
   }
 
+  private autoDetectarDesdeArchivo(file: File): void {
+    const nombre = file.name.toLowerCase();
+    const detectTipo: Record<string, string> = {
+      'hemograma': 'Sangre', 'sangre': 'Sangre', 'perfil': 'Sangre',
+      'glucosa': 'Sangre', 'colesterol': 'Sangre', 'triglicerido': 'Sangre',
+      'orina': 'Orina', 'urocultivo': 'Orina', 'uroanalisis': 'Orina',
+      'rx': 'Imagen (RX)', 'radiografia': 'Imagen (RX)', 'rayos': 'Imagen (RX)',
+      'eco': 'Imagen (Ecografía)', 'ecografia': 'Imagen (Ecografía)', 'ultrasonido': 'Imagen (Ecografía)',
+      'tomografia': 'Imagen (Tomografía)', 'tac': 'Imagen (Tomografía)',
+      'resonancia': 'Imagen (Resonancia)', 'rmn': 'Imagen (Resonancia)',
+      'mamografia': 'Imagen (Mamografía)',
+      'electro': 'Otros', 'ecg': 'Otros', 'eeg': 'Otros',
+      'heces': 'Heces', 'copro': 'Heces', 'parasito': 'Heces',
+      'biopsia': 'Anatomía Patológica', 'patologia': 'Anatomía Patológica',
+      'pcr': 'Infectología', 'cultivo': 'Infectología', 'serologia': 'Infectología',
+      'hormona': 'Hormonas', 'tiroides': 'Hormonas', 'tsh': 'Hormonas',
+    };
+    for (const [key, tipo] of Object.entries(detectTipo)) {
+      if (nombre.includes(key)) {
+        this.examenForm.Tipo_Examen = tipo;
+        break;
+      }
+    }
+    const autoEtiquetas: string[] = [];
+    for (const [key, etq] of Object.entries({
+      'hemograma': 'Hemograma', 'glucosa': 'Glucosa', 'colesterol': 'Colesterol',
+      'orina': 'Orina', 'urocultivo': 'Urocultivo',
+      'rx': 'Radiografía', 'eco': 'Ecografía', 'tac': 'Tomografía',
+      'heces': 'Heces', 'biopsia': 'Biopsia', 'pcr': 'PCR',
+      'hormona': 'Hormonas', 'tiroides': 'Tiroides',
+    })) {
+      if (nombre.includes(key) && !this.examenForm.Etiquetas.includes(etq)) {
+        autoEtiquetas.push(etq);
+      }
+    }
+    if (autoEtiquetas.length > 0) {
+      this.examenForm.Etiquetas = [...this.examenForm.Etiquetas, ...autoEtiquetas];
+    }
+  }
+
   handleFile(file: File) {
     const ext = file.name.split('.').pop()?.toLowerCase();
     if (!['pdf', 'jpg', 'jpeg', 'png'].includes(ext || '')) {
@@ -112,6 +155,7 @@ export default class MedicoConsultaComponent {
     }
     this.examenForm.archivo = file;
     this.examenForm.previewType = ext === 'pdf' ? 'pdf' : 'img';
+    this.autoDetectarDesdeArchivo(file);
     if (ext !== 'pdf') {
       const reader = new FileReader();
       reader.onload = (e) => { this.examenForm.preview = e.target?.result || null; };
@@ -165,15 +209,50 @@ export default class MedicoConsultaComponent {
     }
     this.examenesSvc.upload(fd).subscribe({
       next: (res) => {
-        this.notif.success('Examen subido correctamente. Procesando OCR...');
+        this.notif.success('Examen subido correctamente');
         this.uploadLoading.set(false);
-        this.removeFile();
+        this.uploadSuccess.set(true);
+        this.uploadedExamenId.set(res.examen?.ID_Examen || null);
       },
       error: (err) => {
         this.notif.error(err.error?.message || 'Error al subir examen');
         this.uploadLoading.set(false);
       },
     });
+  }
+
+  generarResumenIA(): void {
+    const id = this.uploadedExamenId();
+    if (!id) return;
+    this.generandoResumen.set(true);
+    this.examenesSvc.generarResumen(id).subscribe({
+      next: () => {
+        this.notif.success('Resumen generado con IA');
+        this.generandoResumen.set(false);
+      },
+      error: (err) => {
+        this.notif.error(err.error?.message || 'Error al generar resumen');
+        this.generandoResumen.set(false);
+      },
+    });
+  }
+
+  verEnHistorial(): void {
+    const c = this.cita();
+    if (c) {
+      this.router.navigate(['/medico/historial/paciente', c.ID_Paciente]);
+    }
+  }
+
+  subirOtroExamen(): void {
+    this.uploadSuccess.set(false);
+    this.uploadedExamenId.set(null);
+    this.removeFile();
+    this.examenForm.Tipo_Examen = 'Sangre';
+    this.examenForm.Etiquetas = [];
+    this.examenForm.Laboratorio = '';
+    this.examenForm.Fecha_Toma = new Date().toISOString().split('T')[0];
+    this.examenForm.Es_Sensible = false;
   }
 
   agregarReceta(): void {

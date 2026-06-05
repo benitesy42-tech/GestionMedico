@@ -101,8 +101,8 @@
           }
         </div>
 
-        @if (examenForm.archivo) {
-          <div class="preview-box p-3 rounded-3 mb-3" style="background:#f0f7ff;">
+        @if (examenForm.archivo && !uploadSuccess()) {
+          <div class="preview-box p-3 rounded-3 mb-3" style="background:#f0f7ff;border:1px solid #cce5ff;">
             <div class="d-flex align-items-center gap-3">
               @if (examenForm.previewType === 'img' && examenForm.preview) {
                 <img [src]="examenForm.preview" class="rounded-2" style="max-width:120px;max-height:100px;object-fit:cover;" />
@@ -129,10 +129,11 @@
                   <option [value]="t">{{ t }}</option>
                 }
               </select>
+              <small class="text-muted" style="font-size:10px;">Auto-detectado del nombre del archivo</small>
             </div>
             <div class="col-6 col-md-4">
               <label class="form-label small fw-semibold">Laboratorio</label>
-              <input class="form-control form-control-sm" [(ngModel)]="examenForm.Laboratorio" placeholder="Nombre del laboratorio" />
+              <input class="form-control form-control-sm" [(ngModel)]="examenForm.Laboratorio" placeholder="Ej: Laboratorio Clínico Central" />
             </div>
             <div class="col-6 col-md-4">
               <label class="form-label small fw-semibold">Fecha de Toma</label>
@@ -182,6 +183,42 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
               Subir y Procesar
             </button>
+          </div>
+        }
+
+        @if (uploadSuccess()) {
+          <div class="preview-box p-3 rounded-3 mb-3" style="background:#e8f5e9;border:1px solid #a5d6a7;">
+            <div class="d-flex align-items-center gap-3">
+              @if (examenForm.previewType === 'img' && examenForm.preview) {
+                <img [src]="examenForm.preview" class="rounded-2" style="max-width:120px;max-height:100px;object-fit:cover;" />
+              } @else if (examenForm.previewType === 'pdf') {
+                <div class="d-flex align-items-center justify-content-center rounded-2" style="width:80px;height:80px;background:#c8e6c9;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#2e7d32" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </div>
+              }
+              <div class="flex-grow-1">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <span class="badge bg-success rounded-pill px-2">Subido correctamente</span>
+                </div>
+                <p class="fw-semibold mb-0 small">{{ examenForm.archivo!.name }}</p>
+                <p class="text-muted mb-0 small">{{ (examenForm.archivo!.size / 1024 / 1024).toFixed(2) }} MB — {{ examenForm.Tipo_Examen }} — {{ examenForm.Laboratorio || 'Sin lab.' }}</p>
+              </div>
+            </div>
+            <div class="mt-3 d-flex flex-wrap gap-2">
+              <button class="btn btn-success btn-sm rounded-pill px-3" (click)="generarResumenIA()" [disabled]="generandoResumen()">
+                @if (generandoResumen()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                Generar resumen con IA
+              </button>
+              <button class="btn btn-outline-primary btn-sm rounded-pill px-3" (click)="verEnHistorial()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                Ver en Historial Clínico
+              </button>
+              <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" (click)="subirOtroExamen()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Subir otro examen
+              </button>
+            </div>
           </div>
         }
       </div>
