@@ -15,7 +15,7 @@ const examenesRoutes = require('./routes/examenes');
 
 const app = express();
 
-app.use(helmet());
+app.use(helmet({ frameguard: false }));
 app.disable('x-powered-by');
 app.use(cors());
 app.use(express.json());

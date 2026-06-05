@@ -231,7 +231,7 @@ router.post('/upload', authenticateToken, upload.single('archivo'), async (req, 
         (async () => {
             try {
                 const ocrResult = await ejecutarOCR(req.file.path);
-                if (ocrResult.texto) {
+                if (ocrResult.texto != null) {
                     const autoDetect = autoDetectarTipoYEtiquetas(ocrResult.texto);
                     const valores = extraerValoresNumericos(ocrResult.texto);
                     const valoresConRangos = await compararConRangos(pool, valores);
@@ -244,16 +244,29 @@ router.post('/upload', authenticateToken, upload.single('archivo'), async (req, 
                          Tipo_Examen = $4, Etiquetas = $5 WHERE ID_Examen = $6`,
                         [ocrResult.texto, alertaGeneral, tieneValores, tipoFinal, nuevasEtiquetas, examen.id_examen]
                     );
-                    for (const v of valoresConRangos) {
-                        await pool.query(
-                            `INSERT INTO Valor_Examen (ID_Examen, Nombre_Valor, Valor_Numerico, Unidad, Rango_Minimo, Rango_Maximo, Estado)
-                             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-                            [examen.id_examen, v.nombre, v.valor, v.unidad, v.rangoMinimo || null, v.rangoMaximo || null, v.estado]
-                        );
+                    if (valoresConRangos.length > 0) {
+                        for (const v of valoresConRangos) {
+                            await pool.query(
+                                `INSERT INTO Valor_Examen (ID_Examen, Nombre_Valor, Valor_Numerico, Unidad, Rango_Minimo, Rango_Maximo, Estado)
+                                 VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+                                [examen.id_examen, v.nombre, v.valor, v.unidad, v.rangoMinimo || null, v.rangoMaximo || null, v.estado]
+                            );
+                        }
                     }
+                } else {
+                    await pool.query(
+                        'UPDATE Examen SET Texto_OCR = $1 WHERE ID_Examen = $2',
+                        ['', examen.id_examen]
+                    );
                 }
             } catch (err) {
                 console.error('Error en OCR post-upload:', err.message);
+                try {
+                    await pool.query(
+                        'UPDATE Examen SET Texto_OCR = $1 WHERE ID_Examen = $2',
+                        ['ERROR', examen.id_examen]
+                    );
+                } catch (e) { /* ignore */ }
             }
         })();
     } catch (err) {

@@ -423,16 +423,25 @@
           <div class="row g-4">
             <div class="col-12 col-lg-6">
               @if (ex.Archivo_Tipo.includes('pdf')) {
-                <iframe [src]="getSafeUrl(ex.ID_Examen)" class="w-100 rounded-3 border" style="height:500px;"></iframe>
+                <div class="d-flex flex-column align-items-center justify-content-center rounded-3 border bg-light mb-2" style="height:400px;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#dc3545" stroke-width="1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                  <p class="mt-2 fw-semibold">{{ ex.Archivo_Nombre }}</p>
+                  <a [href]="getArchivoUrl(ex.ID_Examen)" target="_blank" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                    Abrir PDF
+                  </a>
+                </div>
               } @else {
                 <img [src]="getArchivoUrl(ex.ID_Examen)" class="w-100 rounded-3 border" style="max-height:500px;object-fit:contain;" />
               }
             </div>
             <div class="col-12 col-lg-6">
-              @if (!ex.Texto_OCR) {
-                <div class="alert alert-info py-2 small mb-2 rounded-3">OCR en proceso... espera unos segundos para generar resumen.</div>
+              @if (ex.Texto_OCR === 'ERROR') {
+                <div class="alert alert-warning py-2 small mb-2 rounded-3">OCR falló. Puedes intentar generar resumen.</div>
               }
-              @if (ex.Texto_OCR && !ex.Resumen_Medico) {
+              @if (ex.Texto_OCR == null) {
+                <div class="alert alert-info py-2 small mb-2 rounded-3">OCR en proceso... espera unos segundos.</div>
+              }
+              @if (ex.Texto_OCR != null && !ex.Resumen_Medico) {
                 <button class="btn btn-outline-info btn-sm rounded-pill px-3 w-100 mb-2" (click)="generarResumenIA(ex.ID_Examen)" [disabled]="generandoResumen">
                   @if (generandoResumen) {
                     <span class="spinner-border spinner-border-sm me-1"></span> Generando resumen...

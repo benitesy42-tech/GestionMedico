@@ -224,10 +224,12 @@ export default class MedicoConsultaComponent {
   }
 
   private esperarOcrYActualizar(id: number, intentos = 0): void {
-    if (intentos > 30) return;
+    if (intentos > 45) return;
     this.examenesSvc.getById(id).subscribe({
       next: (examen) => {
-        if (examen.Texto_OCR) {
+        if (examen.Texto_OCR === 'ERROR') {
+          this.notif.warning('OCR falló — puedes generar resumen manualmente después');
+        } else if (examen.Texto_OCR) {
           this.examenForm.Tipo_Examen = examen.Tipo_Examen;
           this.examenForm.Etiquetas = examen.Etiquetas || [];
           this.notif.success('OCR completado — tipo y etiquetas actualizados');
