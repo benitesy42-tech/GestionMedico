@@ -163,6 +163,7 @@ router.post('/', authenticateToken, async(req, res) => {
                         await emitirNotificacionSistema(
                             io, recepUserId, medUserId,
                             `Nueva cita agendada: ${paciNombre} — ${fechaFormateada}`,
+                            medUserId,
                         );
                     }
                 } catch (e) {
@@ -224,6 +225,7 @@ router.put('/:id', authenticateToken, async(req, res) => {
                         await emitirNotificacionSistema(
                             io, recepUserId, medUserId,
                             `Cita ${accion}: ${paciNombre} — ${fechaFormateada}`,
+                            medUserId,
                         );
                     }
                 } catch (e) {
@@ -267,7 +269,7 @@ router.delete('/:id', authenticateToken, async(req, res) => {
                             day: '2-digit', month: '2-digit', year: 'numeric',
                             hour: '2-digit', minute: '2-digit',
                         });
-                        await emitirNotificacionSistema(io, recepUserId, medUserId, `Cita cancelada: ${paciNombre} — ${fechaFormateada}`);
+                        await emitirNotificacionSistema(io, recepUserId, medUserId, `Cita cancelada: ${paciNombre} — ${fechaFormateada}`, medUserId);
                     }
                 } catch (e) { console.error('Error en notificación:', e); }
             })();

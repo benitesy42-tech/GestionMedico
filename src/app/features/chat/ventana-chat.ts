@@ -87,7 +87,7 @@ import { ChatService } from './chat.service';
     </div>
   `,
   styles: [`
-    .chat-ventana { display:flex;flex-direction:column;height:100%;overflow-x:hidden;width:100%; }
+    .chat-ventana { display:flex;flex-direction:column;height:100%;overflow-x:hidden !important;width:100%;max-width:100%; }
     .chat-panel-header { display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid #e5e7eb;flex-shrink:0; }
     .chat-mensajes { flex:1;overflow-y:auto;overflow-x:hidden;padding:12px;background:#f8fafc;width:100%; }
     .chat-burbuja { max-width:80%;padding:8px 12px;border-radius:14px;font-size:0.8rem;word-wrap:break-word; }

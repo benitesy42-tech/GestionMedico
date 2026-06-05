@@ -121,7 +121,7 @@
       @if (chat.panelAbierto()) {
         <div class="chat-panel-backdrop" (click)="chat.togglePanel()"></div>
         <div class="chat-panel animate-slide-in-right">
-          @if (chat.conversacionActiva() && chat.mensajes().length >= 0) {
+          @if (chat.conversacionActiva()) {
             <app-ventana-chat />
           } @else {
             <app-lista-conversaciones />

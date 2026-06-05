@@ -28,4 +28,5 @@ export interface Mensaje {
   leido: boolean;
   creado_en: string;
   remitente_nombre?: string | null;
+  para_usuario_id?: number | null;
 }

@@ -80,7 +80,7 @@ import { ChatService } from './chat.service';
     </div>
   `,
   styles: [`
-    .chat-conversaciones { display:flex;flex-direction:column;height:100%;overflow-x:hidden;width:100%; }
+    .chat-conversaciones { display:flex;flex-direction:column;height:100%;overflow-x:hidden !important;width:100%;max-width:100%; }
     .chat-panel-header { display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #e5e7eb;flex-shrink:0; }
     .chat-lista { flex:1;overflow-y:auto;overflow-x:hidden;width:100%; }
     .chat-conv-item { padding:10px 16px;border-radius:0 !important;transition:background 0.15s;width:100%;text-align:left; }

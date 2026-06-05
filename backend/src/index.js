@@ -62,6 +62,9 @@ io.on('connection', (socket) => {
       );
 
       const msg = result.rows[0];
+      const conv = check.rows[0];
+      const otroId = conv.id_usuario_1 === userId ? conv.id_usuario_2 : conv.id_usuario_1;
+
       const payload = {
         id: msg.id_mensaje,
         conversacion_id: msg.id_conversacion,
@@ -70,9 +73,15 @@ io.on('connection', (socket) => {
         tipo: msg.tipo || 'texto',
         leido: msg.leido,
         creado_en: msg.creado_en,
+        para_usuario_id: otroId,
       };
 
+      // Emit to conversation room (both users if they have it open)
       io.to(`conv_${conversacion_id}`).emit('mensaje:nuevo', payload);
+      // Emit to other user's personal room so they get notified even if conv not open
+      io.to(`user_${otroId}`).emit('mensaje:nuevo', payload);
+      // Also emit to sender (for multi-tab support)
+      io.to(`user_${userId}`).emit('mensaje:nuevo', payload);
     } catch (err) {
       console.error('Error al enviar mensaje:', err);
       socket.emit('error', { message: 'Error al enviar mensaje' });

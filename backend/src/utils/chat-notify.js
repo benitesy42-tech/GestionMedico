@@ -1,6 +1,6 @@
 const pool = require('../db');
 
-async function emitirNotificacionSistema(io, usuario1Id, usuario2Id, contenido) {
+async function emitirNotificacionSistema(io, usuario1Id, usuario2Id, contenido, toastSoloUsuarioId = null) {
   try {
     const id1 = Math.min(usuario1Id, usuario2Id);
     const id2 = Math.max(usuario1Id, usuario2Id);
@@ -21,7 +21,7 @@ async function emitirNotificacionSistema(io, usuario1Id, usuario2Id, contenido) 
       conversacionId = result.rows[0].id_conversacion;
 
       for (const uid of [id1, id2]) {
-        io.to(`user_${uid}`).emit('conversacion:nueva', { id: conversacionId, id_usuario_1: id1, id_usuario_2: id2 });
+        io.to(`user_${uid}`).emit('conversacion:nueva', { id: conversacionId });
       }
     }
 
@@ -39,9 +39,16 @@ async function emitirNotificacionSistema(io, usuario1Id, usuario2Id, contenido) 
       tipo: 'sistema',
       leido: false,
       creado_en: msg.rows[0].creado_en,
+      para_usuario_id: toastSoloUsuarioId,
     };
 
+    // Emit to conversation room (for real-time chat history)
     io.to(`conv_${conversacionId}`).emit('mensaje:nuevo', payload);
+    // Emit to both users' personal rooms (for unread badge + conditional toast)
+    io.to(`user_${id1}`).emit('mensaje:nuevo', payload);
+    io.to(`user_${id2}`).emit('mensaje:nuevo', payload);
+
+    console.log(`[ChatNotify] Notificación enviada: conv=${conversacionId}, users=${id1},${id2}, contenido="${contenido.substring(0, 50)}", toastPara=${toastSoloUsuarioId}`);
   } catch (err) {
     console.error('Error al emitir notificación del sistema:', err);
   }

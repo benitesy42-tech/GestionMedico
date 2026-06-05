@@ -327,6 +327,7 @@ router.post('/upload', authenticateToken, upload.single('archivo'), async (req, 
                         await emitirNotificacionSistema(
                             io, recepUserId, medUserId,
                             `Nuevo examen de laboratorio disponible: ${paciNombre} — ${req.file.originalname}`,
+                            medUserId,
                         );
                     }
                 } catch (e) { console.error('Error en notificación de examen:', e); }

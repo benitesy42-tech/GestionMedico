@@ -62,7 +62,7 @@ export class ChatService {
               conversacion_id: msg.conversacion_id,
             });
           }
-        } else if (msg.tipo === 'sistema') {
+        } else if (msg.tipo === 'sistema' && (!msg.para_usuario_id || msg.para_usuario_id === this._userId)) {
           this.toast.mostrar({
             tipo: 'cita',
             titulo: 'Notificación del sistema',
@@ -117,11 +117,16 @@ export class ChatService {
   }
 
   abrirConversacion(conv: Conversacion) {
-    this.conversacionActiva.set(conv);
-    this.api.get<Mensaje[]>(`/chat/conversaciones/${conv.id}/mensajes`).subscribe((msgs) => {
-      this.mensajes.set(msgs);
-      this.socket?.emit('conversacion:abrir', { conversacion_id: conv.id });
-      this.cargarConversaciones().subscribe();
+    this.api.get<Mensaje[]>(`/chat/conversaciones/${conv.id}/mensajes`).subscribe({
+      next: (msgs) => {
+        this.mensajes.set(msgs);
+        this.conversacionActiva.set(conv);
+        this.socket?.emit('conversacion:abrir', { conversacion_id: conv.id });
+        this.cargarConversaciones().subscribe();
+      },
+      error: (err) => {
+        console.error('Error al cargar mensajes:', err);
+      },
     });
   }
 
