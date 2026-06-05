@@ -42,6 +42,7 @@ export class ChatService {
     });
 
     this.socket.on('mensaje:nuevo', (msg: Mensaje) => {
+      console.log('[Chat] mensaje:nuevo recibido', { id: msg.id, tipo: msg.tipo, convId: msg.conversacion_id, paraId: msg.para_usuario_id, userId: this._userId });
       const convActual = this.conversacionActiva();
       const esConvActiva = convActual && msg.conversacion_id === convActual.id;
 
@@ -63,6 +64,7 @@ export class ChatService {
             });
           }
         } else if (msg.tipo === 'sistema' && (!msg.para_usuario_id || msg.para_usuario_id === this._userId)) {
+          console.log('[Chat] Mostrando toast sistema para usuario', this._userId);
           this.toast.mostrar({
             tipo: 'cita',
             titulo: 'Notificación del sistema',
@@ -117,15 +119,17 @@ export class ChatService {
   }
 
   abrirConversacion(conv: Conversacion) {
+    console.log('[Chat] abrirConversacion', conv.id, conv.otro_usuario?.nombre);
+    this.conversacionActiva.set(conv);
     this.api.get<Mensaje[]>(`/chat/conversaciones/${conv.id}/mensajes`).subscribe({
       next: (msgs) => {
+        console.log('[Chat] mensajes cargados', msgs.length);
         this.mensajes.set(msgs);
-        this.conversacionActiva.set(conv);
         this.socket?.emit('conversacion:abrir', { conversacion_id: conv.id });
         this.cargarConversaciones().subscribe();
       },
       error: (err) => {
-        console.error('Error al cargar mensajes:', err);
+        console.error('[Chat] Error al cargar mensajes:', err);
       },
     });
   }
