@@ -226,7 +226,7 @@ export default class MedicoConsultaComponent {
     if (!id) return;
     this.generandoResumen.set(true);
     this.examenesSvc.generarResumen(id).subscribe({
-      next: () => {
+      next: (res: any) => {
         this.notif.success('Resumen generado con IA');
         this.generandoResumen.set(false);
       },

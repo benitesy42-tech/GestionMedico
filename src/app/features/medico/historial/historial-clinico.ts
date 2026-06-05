@@ -173,6 +173,11 @@ export default class HistorialClinicoComponent {
 
   verExamen(examen: Examen): void {
     this.examenSeleccionado.set(examen);
+    this.examenesSvc.getById(examen.ID_Examen).subscribe({
+      next: (full) => {
+        this.examenSeleccionado.set(full);
+      },
+    });
   }
 
   cerrarExamen(): void {
@@ -182,9 +187,15 @@ export default class HistorialClinicoComponent {
   generarResumenIA(id: number): void {
     this.generandoResumen = true;
     this.examenesSvc.generarResumen(id).subscribe({
-      next: () => {
+      next: (res: any) => {
         this.notif.success('Resumen generado con IA');
         this.generandoResumen = false;
+        const actual = this.examenSeleccionado();
+        if (actual && actual.ID_Examen === id) {
+          actual.Resumen_Medico = res.resumen?.Resumen_Medico || null;
+          actual.Resumen_Paciente = res.resumen?.Resumen_Paciente || null;
+          this.examenSeleccionado.set({ ...actual });
+        }
         const pac = this.selectedPaciente();
         if (pac) this.cargarExamenes(pac.ID_Paciente);
       },

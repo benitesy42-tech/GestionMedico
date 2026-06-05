@@ -33,8 +33,8 @@ export class ExamenesService {
     return this.api.delete<{ message: string }>(`/examenes/${id}`);
   }
 
-  generarResumen(id: number): Observable<{ message: string }> {
-    return this.api.post<{ message: string }>(`/examenes/${id}/generar-resumen`, {});
+  generarResumen(id: number): Observable<{ message: string; resumen?: { Resumen_Medico: string | null; Resumen_Paciente: string | null } }> {
+    return this.api.post<{ message: string; resumen?: { Resumen_Medico: string | null; Resumen_Paciente: string | null } }>(`/examenes/${id}/generar-resumen`, {});
   }
 
   actualizarValores(id: number, valores: any[]): Observable<{ message: string; estadoAlerta: string }> {

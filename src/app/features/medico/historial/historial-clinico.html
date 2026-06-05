@@ -453,6 +453,13 @@
                   <span class="badge bg-danger rounded-pill px-3 py-2">Sensible</span>
                 }
               </div>
+              @if (ex.Etiquetas && ex.Etiquetas.length > 0) {
+                <div class="d-flex flex-wrap gap-1 mb-3">
+                  @for (etq of ex.Etiquetas; track etq) {
+                    <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-2 small">{{ etq }}</span>
+                  }
+                </div>
+              }
               <div class="mb-3">
                 <small class="text-muted d-block">Laboratorio</small>
                 <span class="fw-semibold">{{ ex.Laboratorio || 'No especificado' }}</span>

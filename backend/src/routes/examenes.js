@@ -403,7 +403,6 @@ router.post('/:id/generar-resumen', authenticateToken, async (req, res) => {
             nombre: v.nombre_valor, valor: parseFloat(v.valor_numerico),
             unidad: v.unidad, estado: v.estado,
         }));
-        res.json({ message: 'Generando resumen...' });
         const resumenes = await generarResumenConGroq(examen.texto_ocr, valores, examen.tipo_examen);
         if (resumenes.resumenMedico || resumenes.resumenPaciente) {
             await pool.query(
@@ -411,6 +410,13 @@ router.post('/:id/generar-resumen', authenticateToken, async (req, res) => {
                 [resumenes.resumenMedico, resumenes.resumenPaciente, examen.id_examen]
             );
         }
+        res.json({
+            message: 'Resumen generado correctamente',
+            resumen: {
+                Resumen_Medico: resumenes.resumenMedico,
+                Resumen_Paciente: resumenes.resumenPaciente,
+            },
+        });
     } catch (err) {
         console.error('Error generando resumen:', err);
         res.status(500).json({ message: 'Error al generar resumen' });
