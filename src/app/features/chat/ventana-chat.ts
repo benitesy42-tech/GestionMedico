@@ -87,14 +87,14 @@ import { ChatService } from './chat.service';
     </div>
   `,
   styles: [`
-    .chat-ventana { display:flex;flex-direction:column;height:100%; }
-    .chat-panel-header { display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid #e5e7eb; }
-    .chat-mensajes { flex:1;overflow-y:auto;padding:12px;background:#f8fafc; }
+    .chat-ventana { display:flex;flex-direction:column;height:100%;overflow-x:hidden;width:100%; }
+    .chat-panel-header { display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid #e5e7eb;flex-shrink:0; }
+    .chat-mensajes { flex:1;overflow-y:auto;overflow-x:hidden;padding:12px;background:#f8fafc;width:100%; }
     .chat-burbuja { max-width:80%;padding:8px 12px;border-radius:14px;font-size:0.8rem;word-wrap:break-word; }
     .chat-burbuja.propio { background:#0c4a6e;color:white;border-bottom-right-radius:4px; }
     .chat-burbuja.ajeno { background:white;color:inherit;border:1px solid #e5e7eb;border-bottom-left-radius:4px; }
-    .chat-input { display:flex;align-items:center;padding:10px 12px;border-top:1px solid #e5e7eb;background:white; }
-    .mensaje-sistema { text-align:center;font-size:0.7rem;color:#718096;background:#edf2f7;border-radius:12px;padding:4px 12px;margin:8px auto;max-width:80%; }
+    .chat-input { display:flex;align-items:center;padding:10px 12px;border-top:1px solid #e5e7eb;background:white;flex-shrink:0; }
+    .mensaje-sistema { text-align:center;font-size:0.7rem;color:#718096;background:#edf2f7;border-radius:12px;padding:4px 12px;margin:8px auto;max-width:80%;word-wrap:break-word; }
   `],
 })
 export class VentanaChat implements AfterViewChecked {

@@ -2,11 +2,13 @@ import { Injectable, inject, signal } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { Observable, tap } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
+import { ChatToastService } from './chat-toast.service';
 import { SOCKET_URL, Conversacion, Mensaje } from './types';
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
   private api = inject(ApiService);
+  private toast = inject(ChatToastService);
   private socket: Socket | null = null;
 
   conversaciones = signal<Conversacion[]>([]);
@@ -17,9 +19,18 @@ export class ChatService {
   usuariosDisponibles = signal<{ id: number; nombre: string; rol: string; inicial: string }[]>([]);
 
   private _estados = signal<Map<number, boolean>>(new Map());
+  private _userId: number | null = null;
 
   conectar(token: string) {
     if (this.socket?.connected) return;
+
+    const raw = localStorage.getItem('currentUser');
+    if (raw) {
+      try {
+        const u = JSON.parse(raw);
+        this._userId = u.usuario?.ID_Usuario ?? null;
+      } catch { /* ignore */ }
+    }
 
     this.socket = io(SOCKET_URL, {
       auth: { token },
@@ -32,13 +43,33 @@ export class ChatService {
 
     this.socket.on('mensaje:nuevo', (msg: Mensaje) => {
       const convActual = this.conversacionActiva();
-      if (convActual && msg.conversacion_id === convActual.id) {
+      const esConvActiva = convActual && msg.conversacion_id === convActual.id;
+
+      if (esConvActiva) {
         this.mensajes.update((m) => [...m, msg]);
         if (msg.remitente_id !== null) {
           this.socket?.emit('conversacion:abrir', { conversacion_id: convActual.id });
         }
-      } else if (!convActual || msg.conversacion_id !== convActual.id) {
+      } else {
         this.noLeidos.update((n) => n + 1);
+        if (msg.remitente_id !== null && msg.remitente_id !== this._userId) {
+          const conv = this.conversaciones().find((c) => c.id === msg.conversacion_id);
+          if (conv) {
+            this.toast.mostrar({
+              tipo: 'mensaje',
+              titulo: conv.otro_usuario.nombre,
+              cuerpo: msg.contenido,
+              conversacion_id: msg.conversacion_id,
+            });
+          }
+        } else if (msg.tipo === 'sistema') {
+          this.toast.mostrar({
+            tipo: 'cita',
+            titulo: 'Notificación del sistema',
+            cuerpo: msg.contenido,
+            conversacion_id: msg.conversacion_id,
+          });
+        }
       }
       this.cargarConversaciones().subscribe();
     });
@@ -73,6 +104,7 @@ export class ChatService {
     this.conversacionActiva.set(null);
     this.noLeidos.set(0);
     this._estados.set(new Map());
+    this._userId = null;
   }
 
   cargarConversaciones(): Observable<Conversacion[]> {
