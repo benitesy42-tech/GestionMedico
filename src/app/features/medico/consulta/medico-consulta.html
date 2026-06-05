@@ -236,13 +236,17 @@
             </div>
 
             <div class="d-flex flex-wrap gap-2">
+              <button class="btn btn-primary btn-sm rounded-pill px-4 shadow-sm" (click)="verResultado()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                Ver resumen
+              </button>
               <button class="btn btn-outline-primary btn-sm rounded-pill px-3" (click)="verEnHistorial()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                Ver en Historial Clinico
+                Historial
               </button>
               <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" (click)="subirOtroExamen()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Subir otro examen
+                Subir otro
               </button>
             </div>
           </div>
@@ -302,3 +306,77 @@
     <div class="alert alert-warning animate-slide-down">Cita no encontrada</div>
   }
 </div>
+
+@if (showResultadoModal(); as ex) {
+  @if (examenProcesado(); as exam) {
+    <div class="modal-backdrop fade show" (click)="cerrarResultado()"></div>
+    <div class="modal fade show d-block" tabindex="-1" style="z-index: 1055;">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header border-bottom-0 bg-light px-4 py-3">
+            <div class="d-flex align-items-center gap-2">
+              <h6 class="fw-bold mb-0">Resumen del examen</h6>
+            </div>
+            <button type="button" class="btn-close" (click)="cerrarResultado()"></button>
+          </div>
+          <div class="modal-body px-4 pt-3">
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              <button class="btn btn-sm rounded-pill px-3" [class.btn-dark]="showModalResumenMedico()" [class.btn-outline-dark]="!showModalResumenMedico()" (click)="showModalResumenMedico.set(!showModalResumenMedico()); showModalResumenPaciente.set(false)">
+                Resumen medico
+              </button>
+              <button class="btn btn-sm rounded-pill px-3" [class.btn-info]="showModalResumenPaciente()" [class.btn-outline-info]="!showModalResumenPaciente()" (click)="showModalResumenPaciente.set(!showModalResumenPaciente()); showModalResumenMedico.set(false)">
+                Resumen paciente
+              </button>
+            </div>
+            @if (showModalResumenMedico() && exam.Resumen_Medico) {
+              <div class="bg-light rounded-4 p-3 border mb-3">
+                <p class="mb-0 small lh-sm" style="white-space:pre-wrap;">{{ exam.Resumen_Medico }}</p>
+              </div>
+            }
+            @if (showModalResumenPaciente() && exam.Resumen_Paciente) {
+              <div class="bg-info bg-opacity-10 rounded-4 p-3 border border-info border-opacity-10 mb-3">
+                <p class="mb-0 small lh-sm" style="white-space:pre-wrap;">{{ exam.Resumen_Paciente }}</p>
+              </div>
+            }
+            @if (exam.Valores && exam.Valores.length > 0) {
+              <h6 class="fw-bold small text-uppercase text-muted mb-2">Valores del examen</h6>
+              <div class="table-responsive mb-3">
+                <table class="table table-sm align-middle mb-0" style="border-collapse:separate;border-spacing:0 4px;">
+                  <thead>
+                    <tr class="text-muted small">
+                      <th class="border-0 py-1 ps-0">Parametro</th>
+                      <th class="border-0 py-1 text-end">Resultado</th>
+                      <th class="border-0 py-1 px-2">Unidad</th>
+                      <th class="border-0 py-1">Rango Ref.</th>
+                      <th class="border-0 py-1 text-end">Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (v of exam.Valores; track v.ID_Valor) {
+                      <tr class="align-middle" style="background:#f8f9fa;border-radius:12px;">
+                        <td class="fw-semibold border-0 ps-0 py-2 rounded-start">{{ v.Nombre_Valor }}</td>
+                        <td class="fw-bold text-end border-0 py-2">{{ v.Valor_Numerico }}</td>
+                        <td class="border-0 px-2 py-2">{{ v.Unidad || '-' }}</td>
+                        <td class="border-0 py-2 text-muted small">{{ v.Rango_Minimo }} - {{ v.Rango_Maximo }}</td>
+                        <td class="border-0 py-2 text-end rounded-end"><span class="badge rounded-pill" [class]="getAlertClass(v.Estado)">{{ v.Estado }}</span></td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+            @if (exam.Texto_OCR) {
+              <details class="mb-2">
+                <summary class="text-muted small fw-semibold" style="cursor:pointer;">Ver texto OCR extraido</summary>
+                <pre class="small bg-light p-3 rounded-3 mt-2 mb-0" style="max-height:150px;overflow-y:auto;white-space:pre-wrap;font-size:11px;">{{ exam.Texto_OCR }}</pre>
+              </details>
+            }
+          </div>
+          <div class="modal-footer border-top-0 px-4 pb-3">
+            <button class="btn btn-light rounded-pill px-4" (click)="cerrarResultado()">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+}

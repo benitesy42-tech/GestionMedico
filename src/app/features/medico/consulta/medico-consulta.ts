@@ -8,7 +8,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { CitaView } from '../../../core/models/cita';
 import { ExamenesService } from '../../../core/services/examenes.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { TIPOS_EXAMEN, ETIQUETAS_PREDEFINIDAS } from '../../../core/models/examen';
+import { TIPOS_EXAMEN, ETIQUETAS_PREDEFINIDAS, Examen } from '../../../core/models/examen';
 
 @Component({
   selector: 'app-medico-consulta',
@@ -69,6 +69,10 @@ export default class MedicoConsultaComponent {
   resumenMedico = signal<string | null>(null);
   resumenPaciente = signal<string | null>(null);
   processingError = signal<string | null>(null);
+  examenProcesado = signal<Examen | null>(null);
+  showResultadoModal = signal(false);
+  showModalResumenMedico = signal(false);
+  showModalResumenPaciente = signal(false);
 
   constructor() {
     this.idCita = Number(this.route.snapshot.paramMap.get('idCita'));
@@ -238,6 +242,7 @@ export default class MedicoConsultaComponent {
         if (examen.Resumen_Medico) {
           this.resumenMedico.set(examen.Resumen_Medico);
           this.resumenPaciente.set(examen.Resumen_Paciente);
+          this.examenProcesado.set(examen);
           this.processingStatus.set('complete');
           return;
         }
@@ -277,6 +282,30 @@ export default class MedicoConsultaComponent {
     this.examenForm.Laboratorio = '';
     this.examenForm.Fecha_Toma = new Date().toISOString().split('T')[0];
     this.examenForm.Es_Sensible = false;
+    this.showResultadoModal.set(false);
+  }
+
+  verResultado(): void {
+    this.showResultadoModal.set(true);
+    this.showModalResumenMedico.set(true);
+    this.showModalResumenPaciente.set(false);
+  }
+
+  cerrarResultado(): void {
+    this.showResultadoModal.set(false);
+  }
+
+  getAlertClass(estado: string): string {
+    const map: Record<string, string> = {
+      normal: 'bg-success text-white',
+      borderline: 'bg-warning text-dark',
+      alterado: 'bg-warning text-dark',
+      elevado: 'bg-warning text-dark',
+      critico: 'bg-danger text-white',
+      bajo: 'bg-info text-white',
+      alto: 'bg-warning text-dark',
+    };
+    return map[estado?.toLowerCase()] || 'bg-secondary text-white';
   }
 
   agregarReceta(): void {
