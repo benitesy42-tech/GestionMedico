@@ -206,64 +206,39 @@
               @if (processingStatus() === 'uploading') {
                 <div class="d-flex align-items-center gap-2 text-primary">
                   <span class="spinner-border spinner-border-sm"></span>
-                  <span class="fw-semibold small">⬆ Subiendo archivo...</span>
+                  <span class="fw-semibold small">Subiendo archivo...</span>
                 </div>
               }
               @if (processingStatus() === 'ocr') {
                 <div class="d-flex align-items-center gap-2 text-warning">
                   <span class="spinner-border spinner-border-sm"></span>
-                  <span class="fw-semibold small">🔍 Leyendo contenido del examen (OCR)...</span>
+                  <span class="fw-semibold small">Leyendo contenido del examen...</span>
                 </div>
               }
               @if (processingStatus() === 'generating') {
                 <div class="d-flex align-items-center gap-2 text-info">
                   <span class="spinner-border spinner-border-sm"></span>
-                  <span class="fw-semibold small">🤖 Generando resumen con IA...</span>
+                  <span class="fw-semibold small">Generando resumen con IA...</span>
                 </div>
               }
               @if (processingStatus() === 'complete') {
                 <div class="d-flex align-items-center gap-2 text-success">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                  <span class="fw-semibold small">✅ Examen procesado correctamente</span>
+                  <span class="fw-semibold small">Examen procesado correctamente</span>
                 </div>
               }
               @if (processingStatus() === 'error') {
                 <div class="d-flex align-items-center gap-2 text-danger">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-                  <span class="fw-semibold small">⚠ {{ processingError() || 'Error al procesar el examen' }}</span>
+                  <span class="fw-semibold small">{{ processingError() || 'Error al procesar el examen' }}</span>
                 </div>
               }
             </div>
 
-            @if (resumenMedico() || resumenPaciente()) {
-              <div class="d-flex flex-wrap gap-2 mb-3">
-                @if (resumenMedico()) {
-                  <button class="btn btn-sm rounded-pill px-3" [class.btn-dark]="showResumenMedico()" [class.btn-outline-dark]="!showResumenMedico()" (click)="showResumenMedico.set(!showResumenMedico())">
-                    👨‍⚕️ Resumen médico
-                  </button>
-                }
-                @if (resumenPaciente()) {
-                  <button class="btn btn-sm rounded-pill px-3" [class.btn-info]="showResumenPaciente()" [class.btn-outline-info]="!showResumenPaciente()" (click)="showResumenPaciente.set(!showResumenPaciente())">
-                    🗣️ Resumen paciente
-                  </button>
-                }
-              </div>
-            }
-            @if (showResumenMedico() && resumenMedico(); as rm) {
-              <div class="bg-white rounded-3 p-3 border mb-2">
-                <p class="mb-0 small lh-sm" style="white-space:pre-wrap;">{{ rm }}</p>
-              </div>
-            }
-            @if (showResumenPaciente() && resumenPaciente(); as rp) {
-              <div class="bg-info bg-opacity-10 rounded-3 p-3 border border-info border-opacity-10 mb-2">
-                <p class="mb-0 small lh-sm" style="white-space:pre-wrap;">{{ rp }}</p>
-              </div>
-            }
-
             <div class="d-flex flex-wrap gap-2">
               <button class="btn btn-outline-primary btn-sm rounded-pill px-3" (click)="verEnHistorial()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                Ver en Historial Clínico
+                Ver en Historial Clinico
               </button>
               <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" (click)="subirOtroExamen()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>

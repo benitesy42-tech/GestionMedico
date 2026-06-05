@@ -236,8 +236,8 @@ async function generarResumenConGroq(textoOCR, valores, tipoExamen) {
         const resumenValores = valores && valores.length > 0
             ? `VALORES EXTRAÍDOS:\n${JSON.stringify(valores, null, 2)}`
             : 'No se extrajeron valores numéricos.';
-        const promptMedico = `Eres un médico especialista. Genera un resumen técnico conciso de este examen de laboratorio (Tipo: ${tipoExamen || 'No especificado'}). Enfócate en hallazgos relevantes, valores alterados e interpretación clínica breve.\n\n${resumenValores}\n\nTEXTO DEL EXAMEN:\n${texto}\n\nResumen técnico:`;
-        const promptPaciente = `Eres un médico explicando resultados a un paciente. Genera un resumen en lenguaje sencillo y claro, sin tecnicismos, explicando qué significa el resultado del examen.\n\n${resumenValores}\n\nTEXTO DEL EXAMEN:\n${texto}\n\nResumen para el paciente:`;
+        const promptMedico = `Eres un médico especialista. Genera un resumen técnico MUY CONCISO de este examen de laboratorio (Tipo: ${tipoExamen || 'No especificado'}). Usa viñetas (-) sin negritas ni markdown. Incluye solo: hallazgos relevantes, valores alterados, interpretación clínica breve.\n\n${resumenValores}\n\nTEXTO DEL EXAMEN:\n${texto}\n\nResumen (máximo 8 líneas, solo viñetas -):`;
+        const promptPaciente = `Eres un médico explicando resultados a un paciente. Genera un resumen MUY CORTO en lenguaje sencillo. Usa viñetas (-) sin negritas ni markdown. Explica qué significan los resultados principales de forma clara.\n\n${resumenValores}\n\nTEXTO DEL EXAMEN:\n${texto}\n\nResumen (máximo 6 líneas, solo viñetas -):`;
         const [resMedico, resPaciente] = await Promise.all([
             groq.chat.completions.create({
                 messages: [{ role: 'user', content: promptMedico }],
