@@ -42,7 +42,8 @@ export class ExamenesService {
   }
 
   getArchivoUrl(id: number): string {
-    return `${this.api['baseUrl']}/examenes/${id}/archivo`;
+    const token = localStorage.getItem('token');
+    return `${this.api['baseUrl']}/examenes/${id}/archivo?token=${token}`;
   }
 
   getRangos(): Observable<RangoReferencia[]> {

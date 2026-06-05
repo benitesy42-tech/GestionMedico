@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const jwt = require('jsonwebtoken');
 const { createWorker } = require('tesseract.js');
 const pool = require('../db');
 const { authenticateToken, requireRole } = require('../middleware/auth');
@@ -334,8 +335,21 @@ router.get('/:id', authenticateToken, async (req, res) => {
     }
 });
 
-router.get('/:id/archivo', authenticateToken, async (req, res) => {
+router.get('/:id/archivo', async (req, res) => {
     try {
+        const authHeader = req.headers['authorization'];
+        const queryToken = req.query.token;
+        let token = authHeader && authHeader.split(' ')[1];
+        if (!token && queryToken) { token = queryToken; }
+        if (!token) {
+            return res.status(401).json({ message: 'Token de acceso requerido' });
+        }
+        let user;
+        try {
+            user = jwt.verify(token, process.env.JWT_SECRET);
+        } catch {
+            return res.status(403).json({ message: 'Token inválido o expirado' });
+        }
         const result = await pool.query('SELECT * FROM Examen WHERE ID_Examen = $1', [req.params.id]);
         if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Examen no encontrado' });
@@ -344,10 +358,10 @@ router.get('/:id/archivo', authenticateToken, async (req, res) => {
         if (!fs.existsSync(examen.archivo_ruta)) {
             return res.status(404).json({ message: 'Archivo no encontrado en el servidor' });
         }
-        if (examen.es_sensible && req.user.rol !== 'administrador') {
+        if (examen.es_sensible && user.rol !== 'administrador') {
             await pool.query(
                 `INSERT INTO Log_Acceso_Sensible (ID_Examen, ID_Usuario, IP) VALUES ($1, $2, $3)`,
-                [examen.id_examen, req.user.id, getClientIp(req)]
+                [examen.id_examen, user.id, getClientIp(req)]
             );
         }
         res.sendFile(examen.archivo_ruta);
