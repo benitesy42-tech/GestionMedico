@@ -40,6 +40,7 @@ export default class HistorialClinicoComponent {
   examenes = signal<Examen[]>([]);
   examenesLoading = signal(false);
   examenSeleccionado = signal<Examen | null>(null);
+  generandoResumen = false;
   filtroExamenTipo = signal('');
   filtroExamenEstado = signal('');
   filtroExamenLab = signal('');
@@ -176,6 +177,22 @@ export default class HistorialClinicoComponent {
 
   cerrarExamen(): void {
     this.examenSeleccionado.set(null);
+  }
+
+  generarResumenIA(id: number): void {
+    this.generandoResumen = true;
+    this.examenesSvc.generarResumen(id).subscribe({
+      next: () => {
+        this.notif.success('Resumen generado con IA');
+        this.generandoResumen = false;
+        const pac = this.selectedPaciente();
+        if (pac) this.cargarExamenes(pac.ID_Paciente);
+      },
+      error: (err) => {
+        this.notif.error(err.error?.message || 'Error al generar resumen');
+        this.generandoResumen = false;
+      },
+    });
   }
 
   getArchivoUrl(id: number): string {

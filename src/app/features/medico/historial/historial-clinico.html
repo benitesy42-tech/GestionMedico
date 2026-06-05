@@ -460,6 +460,16 @@
                   </div>
                 </div>
               }
+              @if (!ex.Resumen_Medico && ex.Texto_OCR) {
+                <button class="btn btn-outline-info btn-sm rounded-pill px-3 w-100 mb-3" (click)="generarResumenIA(ex.ID_Examen)" [disabled]="generandoResumen">
+                  @if (generandoResumen) {
+                    <span class="spinner-border spinner-border-sm me-1"></span> Generando...
+                  } @else {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    Generar resumen con IA
+                  }
+                </button>
+              }
               @if (ex.Valores && ex.Valores.length > 0) {
                 <h6 class="fw-semibold small mb-2">Valores Extraídos</h6>
                 <div class="table-responsive">
