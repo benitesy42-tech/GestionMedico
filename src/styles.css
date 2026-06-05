@@ -556,6 +556,7 @@ body {
   flex-direction: column;
   overflow: hidden;
   overflow-x: hidden !important;
+  padding-bottom: 10px;
 }
 
 @media (max-width: 575.98px) {
