@@ -406,130 +406,123 @@
 @if (examenSeleccionado(); as ex) {
   <div class="modal-backdrop fade show" (click)="cerrarExamen()"></div>
   <div class="modal fade show d-block" tabindex="-1" style="z-index: 1055;">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-      <div class="modal-content border-0 shadow-lg">
-        <div class="modal-header border-0" style="background:#f8f9fa;">
-          <div class="d-flex align-items-center gap-2">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header border-bottom-0 bg-light px-4 py-3">
+          <div class="d-flex align-items-center gap-3 w-100">
+            <div class="d-flex align-items-center gap-2 flex-grow-1 min-width-0">
+              <span class="fs-5">📄</span>
+              <div class="min-width-0">
+                <h6 class="fw-bold mb-0 text-truncate">{{ ex.Archivo_Nombre }}</h6>
+                <small class="text-muted">{{ ex.Tipo_Examen }} · {{ ex.Fecha_Toma || 'Fecha no registrada' }}</small>
+              </div>
+            </div>
             @if (ex.Archivo_Tipo.includes('pdf')) {
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc3545" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            } @else {
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0d6efd" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <a [href]="getArchivoUrl(ex.ID_Examen)" target="_blank" class="btn btn-outline-secondary btn-sm rounded-pill px-3 flex-shrink-0">
+                Abrir PDF
+              </a>
             }
-            <h6 class="fw-bold mb-0">{{ ex.Archivo_Nombre }}</h6>
+            <button type="button" class="btn-close flex-shrink-0" (click)="cerrarExamen()"></button>
           </div>
-          <button type="button" class="btn-close" (click)="cerrarExamen()"></button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body px-4 pt-3">
+          @if (!ex.Resumen_Medico) {
+            <button class="btn btn-outline-info rounded-pill px-4 w-100 mb-4" (click)="generarResumenIA(ex.ID_Examen)" [disabled]="generandoResumen">
+              @if (generandoResumen) {
+                <span class="spinner-border spinner-border-sm me-2"></span> Generando resumen...
+              } @else {
+                🤖 Generar resumen con IA
+              }
+            </button>
+          } @else {
+            <div class="d-flex gap-2 mb-4">
+              <button class="btn btn-outline-info rounded-pill px-4" (click)="generarResumenIA(ex.ID_Examen)" [disabled]="generandoResumen">
+                @if (generandoResumen) {
+                  <span class="spinner-border spinner-border-sm me-2"></span> Regenerando...
+                } @else {
+                  🤖 Regenerar resumen
+                }
+              </button>
+            </div>
+          }
           <div class="row g-4">
             <div class="col-12 col-lg-6">
-              @if (ex.Archivo_Tipo.includes('pdf')) {
-                <div class="d-flex flex-column align-items-center justify-content-center rounded-3 border bg-light mb-2" style="height:400px;">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#dc3545" stroke-width="1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                  <p class="mt-2 fw-semibold">{{ ex.Archivo_Nombre }}</p>
-                  <a [href]="getArchivoUrl(ex.ID_Examen)" target="_blank" class="btn btn-outline-danger btn-sm rounded-pill px-3">
-                    Abrir PDF
-                  </a>
-                </div>
-              } @else {
-                <img [src]="getArchivoUrl(ex.ID_Examen)" class="w-100 rounded-3 border" style="max-height:500px;object-fit:contain;" />
-              }
-            </div>
-            <div class="col-12 col-lg-6">
-              @if (!ex.Resumen_Medico) {
-                <button class="btn btn-outline-info btn-sm rounded-pill px-3 w-100 mb-2" (click)="generarResumenIA(ex.ID_Examen)" [disabled]="generandoResumen">
-                  @if (generandoResumen) {
-                    <span class="spinner-border spinner-border-sm me-1"></span> Generando resumen...
-                  } @else {
-                    Generar resumen con IA
-                  }
-                </button>
-              } @else {
-                <div class="mb-2 d-flex gap-2">
-                  <button class="btn btn-outline-info btn-sm rounded-pill px-3" (click)="generarResumenIA(ex.ID_Examen)" [disabled]="generandoResumen">
-                    @if (generandoResumen) {
-                      <span class="spinner-border spinner-border-sm me-1"></span> Regenerando...
-                    } @else {
-                      Regenerar resumen
-                    }
-                  </button>
-                </div>
-              }
               <div class="d-flex flex-wrap gap-2 mb-3">
-                <span class="badge rounded-pill px-3 py-2" [class]="getAlertClass(ex.Estado_Alerta)">{{ ex.Estado_Alerta }}</span>
-                <span class="badge bg-primary rounded-pill px-3 py-2">{{ ex.Tipo_Examen }}</span>
+                <span class="badge rounded-pill px-3 py-1 fs-6" [class]="getAlertClass(ex.Estado_Alerta)">{{ ex.Estado_Alerta }}</span>
+                <span class="badge bg-dark rounded-pill px-3 py-1 fs-6">{{ ex.Tipo_Examen }}</span>
                 @if (ex.Es_Sensible) {
-                  <span class="badge bg-danger rounded-pill px-3 py-2">Sensible</span>
+                  <span class="badge bg-danger rounded-pill px-3 py-1 fs-6">Sensible</span>
                 }
               </div>
               @if (ex.Etiquetas && ex.Etiquetas.length > 0) {
                 <div class="d-flex flex-wrap gap-1 mb-3">
                   @for (etq of ex.Etiquetas; track etq) {
-                    <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-2 small">{{ etq }}</span>
+                    <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2 small">{{ etq }}</span>
                   }
                 </div>
               }
               <div class="mb-3">
-                <small class="text-muted d-block">Laboratorio</small>
-                <span class="fw-semibold">{{ ex.Laboratorio || 'No especificado' }}</span>
+                <small class="text-muted d-block fw-semibold mb-0">Laboratorio</small>
+                <span class="fw-semibold fs-5">{{ ex.Laboratorio || 'No especificado' }}</span>
               </div>
-              <div class="mb-3">
-                <small class="text-muted d-block">Fecha de Toma</small>
-                <span class="fw-semibold">{{ ex.Fecha_Toma || 'No registrada' }}</span>
-              </div>
+            </div>
+            <div class="col-12 col-lg-6">
               @if (ex.Resumen_Medico) {
-                <div class="card bg-light border-0 mb-3">
-                  <div class="card-body p-3">
-                    <small class="text-muted d-block mb-1 fw-semibold">Resumen para el médico</small>
-                    <p class="mb-0 small">{{ ex.Resumen_Medico }}</p>
+                <div class="mb-3">
+                  <h6 class="fw-bold small text-uppercase text-muted mb-2">👨‍⚕️ Resumen médico</h6>
+                  <div class="bg-light rounded-4 p-3 border">
+                    <p class="mb-0 small lh-sm" style="white-space:pre-wrap;">{{ ex.Resumen_Medico }}</p>
                   </div>
                 </div>
               }
               @if (ex.Resumen_Paciente) {
-                <div class="card bg-info bg-opacity-10 border-0 mb-3">
-                  <div class="card-body p-3">
-                    <small class="text-muted d-block mb-1 fw-semibold">Resumen para el paciente</small>
-                    <p class="mb-0 small">{{ ex.Resumen_Paciente }}</p>
+                <div class="mb-3">
+                  <h6 class="fw-bold small text-uppercase text-muted mb-2">🗣️ Resumen para el paciente</h6>
+                  <div class="bg-info bg-opacity-10 rounded-4 p-3 border border-info border-opacity-10">
+                    <p class="mb-0 small lh-sm" style="white-space:pre-wrap;">{{ ex.Resumen_Paciente }}</p>
                   </div>
-                </div>
-              }
-              @if (ex.Valores && ex.Valores.length > 0) {
-                <h6 class="fw-semibold small mb-2">Valores Extraídos</h6>
-                <div class="table-responsive">
-                  <table class="table table-sm table-bordered small">
-                    <thead>
-                      <tr>
-                        <th>Valor</th>
-                        <th>Resultado</th>
-                        <th>Unidad</th>
-                        <th>Rango Ref.</th>
-                        <th>Estado</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      @for (v of ex.Valores; track v.ID_Valor) {
-                        <tr>
-                          <td class="fw-semibold">{{ v.Nombre_Valor }}</td>
-                          <td>{{ v.Valor_Numerico }}</td>
-                          <td>{{ v.Unidad || '-' }}</td>
-                          <td>{{ v.Rango_Minimo }} – {{ v.Rango_Maximo }}</td>
-                          <td><span class="badge rounded-pill px-2" [class]="getAlertClass(v.Estado)">{{ v.Estado }}</span></td>
-                        </tr>
-                      }
-                    </tbody>
-                  </table>
-                </div>
-              }
-              @if (ex.Texto_OCR) {
-                <div>
-                  <small class="text-muted d-block mb-1 fw-semibold">Texto OCR extraído</small>
-                  <pre class="small bg-light p-3 rounded-3 mb-0" style="max-height:200px;overflow-y:auto;white-space:pre-wrap;">{{ ex.Texto_OCR }}</pre>
                 </div>
               }
             </div>
           </div>
+          @if (ex.Valores && ex.Valores.length > 0) {
+            <div class="mt-4">
+              <h6 class="fw-bold small text-uppercase text-muted mb-2">📊 Valores del examen</h6>
+              <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0" style="border-collapse:separate;border-spacing:0 4px;">
+                  <thead>
+                    <tr class="text-muted small">
+                      <th class="border-0 py-1 ps-0">Parámetro</th>
+                      <th class="border-0 py-1 text-end">Resultado</th>
+                      <th class="border-0 py-1 px-2">Unidad</th>
+                      <th class="border-0 py-1">Rango Ref.</th>
+                      <th class="border-0 py-1 text-end">Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (v of ex.Valores; track v.ID_Valor) {
+                      <tr class="align-middle" style="background:#f8f9fa;border-radius:12px;">
+                        <td class="fw-semibold border-0 ps-0 py-2 rounded-start">{{ v.Nombre_Valor }}</td>
+                        <td class="fw-bold text-end border-0 py-2">{{ v.Valor_Numerico }}</td>
+                        <td class="border-0 px-2 py-2">{{ v.Unidad || '-' }}</td>
+                        <td class="border-0 py-2 text-muted small">{{ v.Rango_Minimo }} – {{ v.Rango_Maximo }}</td>
+                        <td class="border-0 py-2 text-end rounded-end"><span class="badge rounded-pill" [class]="getAlertClass(v.Estado)">{{ v.Estado }}</span></td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          }
+          @if (ex.Texto_OCR) {
+            <details class="mt-4">
+              <summary class="text-muted small fw-semibold cursor-pointer" style="cursor:pointer;">📝 Ver texto OCR extraído</summary>
+              <pre class="small bg-light p-3 rounded-3 mt-2 mb-0" style="max-height:200px;overflow-y:auto;white-space:pre-wrap;font-size:11px;">{{ ex.Texto_OCR }}</pre>
+            </details>
+          }
         </div>
-        <div class="modal-footer border-0">
-          <button class="btn btn-secondary rounded-pill px-3" (click)="cerrarExamen()">Cerrar</button>
+        <div class="modal-footer border-top-0 px-4 pb-3">
+          <button class="btn btn-light rounded-pill px-4" (click)="cerrarExamen()">Cerrar</button>
         </div>
       </div>
     </div>

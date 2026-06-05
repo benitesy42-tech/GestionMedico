@@ -105,13 +105,17 @@ function extraerValoresNumericos(texto) {
     const valores = [];
     const lineas = texto.split('\n');
     for (const linea of lineas) {
-        const match = linea.match(/^([A-ZÁÉÍÓÚÑa-záéíóúñ\s]+)\s*:?\s*([<>]?\d+[.,]?\d*)\s*([a-zA-Z/%µ]+)?/);
+        const l = linea.trim();
+        if (!l || l.length < 5) continue;
+        // Saltar líneas de cabecera de tabla (solo mayúsculas o mezcla mayúsculas/números)
+        if (/^[A-ZÁÉÍÓÚÑ\s\d/()%]{5,}$/i.test(l) && !/[a-záéíóúñ]/.test(l)) continue;
+        const match = l.match(/^([A-ZÁÉÍÓÚÑa-záéíóúñ][A-ZÁÉÍÓÚÑa-záéíóúñ\s]{2,}?)\s*:?\s*([<>]?\d+[.,]?\d*)\s*([a-zA-Z/%µ²³]+)?/);
         if (match) {
             const nombre = match[1].trim();
             const valorStr = match[2].replace(',', '.');
             const unidad = (match[3] || '').trim();
             const valorNum = parseFloat(valorStr);
-            if (!isNaN(valorNum)) {
+            if (!isNaN(valorNum) && nombre.length < 60) {
                 valores.push({ nombre, valor: valorNum, unidad });
             }
         }
