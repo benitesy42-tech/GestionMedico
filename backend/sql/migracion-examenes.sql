@@ -19,6 +19,7 @@ CREATE TABLE Examen (
     Laboratorio VARCHAR(200),
     Fecha_Toma DATE,
     Fecha_Subida TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    Notas_Clinicas TEXT,
     Tipo_Examen VARCHAR(50) NOT NULL,
     Etiquetas TEXT[] DEFAULT '{}',
     Es_Sensible BOOLEAN DEFAULT FALSE,

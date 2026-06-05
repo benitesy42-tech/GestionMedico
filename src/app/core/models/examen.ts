@@ -7,6 +7,7 @@ export interface Examen {
   Archivo_Tipo: string;
   Archivo_Tamanio: number;
   Texto_OCR: string | null;
+  Notas_Clinicas: string | null;
   Resumen_Medico: string | null;
   Resumen_Paciente: string | null;
   Laboratorio: string | null;

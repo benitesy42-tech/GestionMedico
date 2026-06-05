@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiService } from './api.service';
+import { HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Examen, RangoReferencia } from '../models/examen';
 
@@ -7,10 +8,16 @@ import { Examen, RangoReferencia } from '../models/examen';
 export class ExamenesService {
   private api = inject(ApiService);
 
-  getByPaciente(idPaciente: number, params?: {
+  getByPaciente(idPaciente: number, filters?: {
     tipo?: string; laboratorio?: string; estado?: string;
     desde?: string; hasta?: string; q?: string;
   }): Observable<Examen[]> {
+    let params = new HttpParams();
+    if (filters) {
+      for (const [key, val] of Object.entries(filters)) {
+        if (val) { params = params.set(key, val); }
+      }
+    }
     return this.api.get<Examen[]>(`/examenes/paciente/${idPaciente}`, params);
   }
 

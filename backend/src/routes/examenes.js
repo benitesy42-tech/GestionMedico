@@ -104,6 +104,73 @@ function determinarAlertaGeneral(valores) {
     return 'normal';
 }
 
+function autoDetectarTipoYEtiquetas(textoOCR) {
+    if (!textoOCR) return { tipoSugerido: null, etiquetasSugeridas: [] };
+    const t = textoOCR.toLowerCase();
+    const etiquetas = [];
+
+    if (/glucosa|hemoglobina|hematocrito|leucocito|plaqueta|eritrocito|serología|perfil.*lipídico|colesterol|triglicéridos/i.test(t)) {
+        etiquetas.push('Sangre');
+    }
+    if (/orina|uroanálisis|urocultivo|sedimento|proteinuria|hematuria/i.test(t)) {
+        etiquetas.push('Orina');
+    }
+    if (/radiograf[íi]a|rx|rayos\s*x|placa\s*de\s*t[óo]rax/i.test(t)) {
+        etiquetas.push('RX');
+    }
+    if (/ecograf[íi]a|eco|ultrasonido|ecocardiograma|ecotomograf[íi]a/i.test(t)) {
+        etiquetas.push('ECO');
+    }
+    if (/tomograf[íi]a|tac|tc\s*scan/i.test(t)) {
+        etiquetas.push('TAC');
+    }
+    if (/resonancia|rmn|rm\s*|imagen\s*por\s*resonancia/i.test(t)) {
+        etiquetas.push('RMN');
+    }
+    if (/microbiolog[íi]a|cultivo|antibiograma|baciloscopia|frotis/i.test(t)) {
+        etiquetas.push('Microbiología');
+    }
+    if (/histopatolog[íi]a|biopsia|anatom[íi]a\s*patológica|citolog[íi]a/i.test(t)) {
+        etiquetas.push('Histopatología');
+    }
+    if (/creatinina|urea|nitr[óo]geno|tfge|filtración\s*glomerular|proteinuria/i.test(t)) {
+        etiquetas.push('Función Renal');
+    }
+    if (/alt|ast|ggt|transaminasa|bilirrubina|fosfatasa|alanina\s*aminotransferasa|aspartato\s*aminotransferasa|hepatitis|gamma\s*glutamil/i.test(t)) {
+        etiquetas.push('Función Hepática');
+    }
+    if (/colesterol\s*total|hdl|ldl|triglicéridos|perfil\s*lipídico/i.test(t)) {
+        etiquetas.push('Perfil Lipídico');
+    }
+    if (/tsh|t4\s*libre|t3|hormona\s*tir[oó]idea|prolactina|cortisol|estradiol|testosterona|fsh|lh|insulina|hormona/i.test(t)) {
+        etiquetas.push('Hormonas');
+    }
+    const unique = [...new Set(etiquetas)];
+
+    let tipoSugerido = null;
+    if (unique.includes('RX') || unique.includes('ECO') || unique.includes('TAC') || unique.includes('RMN')) {
+        tipoSugerido = `Imagen (${unique.find(e => ['RX','ECO','TAC','RMN'].includes(e))})`;
+    } else if (unique.includes('Sangre')) {
+        tipoSugerido = 'Sangre';
+    } else if (unique.includes('Orina')) {
+        tipoSugerido = 'Orina';
+    } else if (unique.includes('Microbiología')) {
+        tipoSugerido = 'Microbiología';
+    } else if (unique.includes('Histopatología')) {
+        tipoSugerido = 'Histopatología';
+    } else if (unique.includes('Función Renal')) {
+        tipoSugerido = 'Función Renal';
+    } else if (unique.includes('Función Hepática')) {
+        tipoSugerido = 'Función Hepática';
+    } else if (unique.includes('Perfil Lipídico')) {
+        tipoSugerido = 'Perfil Lipídico';
+    } else if (unique.includes('Hormonas')) {
+        tipoSugerido = 'Hormonas';
+    }
+
+    return { tipoSugerido, etiquetasSugeridas: unique };
+}
+
 async function generarResumenConGroq(textoOCR, valores, tipoExamen) {
     const GROQ_API_KEY = process.env.GROQ_API_KEY;
     if (!GROQ_API_KEY || !textoOCR) {
@@ -150,7 +217,7 @@ router.post('/upload', authenticateToken, upload.single('archivo'), async (req, 
         const esSensible = Es_Sensible === 'true' || Es_Sensible === true;
         const result = await pool.query(
             `INSERT INTO Examen (ID_Paciente, ID_Consulta, Archivo_Nombre, Archivo_Ruta, Archivo_Tipo, Archivo_Tamanio,
-             Laboratorio, Fecha_Toma, Tipo_Examen, Etiquetas, Es_Sensible, Subido_Por, Texto_OCR)
+             Laboratorio, Fecha_Toma, Tipo_Examen, Etiquetas, Es_Sensible, Subido_Por, Notas_Clinicas)
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *`,
             [
                 ID_Paciente, ID_Consulta || null, req.file.originalname, req.file.path,
@@ -164,13 +231,17 @@ router.post('/upload', authenticateToken, upload.single('archivo'), async (req, 
             try {
                 const ocrResult = await ejecutarOCR(req.file.path);
                 if (ocrResult.texto) {
+                    const autoDetect = autoDetectarTipoYEtiquetas(ocrResult.texto);
                     const valores = extraerValoresNumericos(ocrResult.texto);
                     const valoresConRangos = await compararConRangos(pool, valores);
                     const alertaGeneral = determinarAlertaGeneral(valoresConRangos);
                     const tieneValores = valoresConRangos.length > 0;
+                    const nuevasEtiquetas = [...new Set([...etiquetas, ...autoDetect.etiquetasSugeridas])];
+                    const tipoFinal = Tipo_Examen && Tipo_Examen !== 'Otro' ? Tipo_Examen : (autoDetect.tipoSugerido || 'Otro');
                     await pool.query(
-                        `UPDATE Examen SET Texto_OCR = $1, Estado_Alerta = $2, Tiene_Valores = $3 WHERE ID_Examen = $4`,
-                        [ocrResult.texto, alertaGeneral, tieneValores, examen.id_examen]
+                        `UPDATE Examen SET Texto_OCR = $1, Estado_Alerta = $2, Tiene_Valores = $3,
+                         Tipo_Examen = $4, Etiquetas = $5 WHERE ID_Examen = $6`,
+                        [ocrResult.texto, alertaGeneral, tieneValores, tipoFinal, nuevasEtiquetas, examen.id_examen]
                     );
                     for (const v of valoresConRangos) {
                         await pool.query(
@@ -428,6 +499,7 @@ function normalizeExamen(row) {
         Archivo_Tipo: row.archivo_tipo,
         Archivo_Tamanio: row.archivo_tamanio,
         Texto_OCR: row.texto_ocr,
+        Notas_Clinicas: row.notas_clinicas,
         Resumen_Medico: row.resumen_medico,
         Resumen_Paciente: row.resumen_paciente,
         Laboratorio: row.laboratorio,
