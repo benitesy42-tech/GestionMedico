@@ -5,7 +5,6 @@ const path = require('path');
 const fs = require('fs');
 const jwt = require('jsonwebtoken');
 const { createWorker } = require('tesseract.js');
-const pdfjsLib = require('pdfjs-dist');
 const pool = require('../db');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 
@@ -46,20 +45,34 @@ async function ejecutarOCR(rutaArchivo) {
     const ext = path.extname(rutaArchivo).toLowerCase();
     if (ext === '.pdf') {
         try {
-            const data = new Uint8Array(fs.readFileSync(rutaArchivo));
-            const doc = await pdfjsLib.getDocument({ data }).promise;
-            let texto = '';
-            for (let i = 1; i <= doc.numPages; i++) {
-                const page = await doc.getPage(i);
-                const content = await page.getTextContent();
-                texto += content.items.map(item => item.str).join(' ') + '\n';
+            let pdfjsLib;
+            try {
+                pdfjsLib = require('pdfjs-dist');
+            } catch (e) {
+                try {
+                    pdfjsLib = require('pdfjs-dist/legacy/build/pdf');
+                } catch (e2) {
+                    console.error('pdfjs-dist no disponible, fallback a Tesseract:', e2.message);
+                    pdfjsLib = null;
+                }
             }
-            texto = texto.trim();
-            console.log('PDF texto extraído, chars:', texto.length);
-            return { texto, confianza: 100 };
+            if (pdfjsLib) {
+                const data = new Uint8Array(fs.readFileSync(rutaArchivo));
+                const doc = await pdfjsLib.getDocument({ data }).promise;
+                let texto = '';
+                for (let i = 1; i <= doc.numPages; i++) {
+                    const page = await doc.getPage(i);
+                    const content = await page.getTextContent();
+                    texto += content.items.map(item => item.str).join(' ') + '\n';
+                }
+                texto = texto.trim();
+                if (texto) {
+                    console.log('PDF texto extraído, chars:', texto.length);
+                    return { texto, confianza: 100 };
+                }
+            }
         } catch (err) {
             console.error('Error extrayendo PDF:', err.message);
-            return { texto: '', confianza: 0 };
         }
     }
     try {
